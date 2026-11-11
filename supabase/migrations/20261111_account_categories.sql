@@ -22,6 +22,7 @@ create index if not exists accounts_category_status_created_idx
 alter table public.accounts enable row level security;
 grant select on public.accounts to anon, authenticated;
 grant insert, update, delete on public.accounts to authenticated;
+grant usage, select on sequence public.accounts_id_seq to authenticated;
 drop policy if exists "Public can read accounts" on public.accounts;
 create policy "Public can read accounts" on public.accounts for select using (true);
 drop policy if exists "Admins can insert accounts" on public.accounts;
