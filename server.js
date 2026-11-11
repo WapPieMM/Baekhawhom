@@ -9,8 +9,14 @@ const app = express();
 const port = Number(process.env.PORT || 3000);
 const web = path.join(__dirname, 'public');
 const srcAssets = path.join(__dirname, 'src', 'assets');
-const uploadsDir = path.join(web, 'uploads');
-const dataDir = path.join(__dirname, 'data');
+// Vercel's deployed bundle is read-only. Use /tmp for legacy file-backed
+// endpoints there; local development continues to use project folders.
+const isVercel = Boolean(process.env.VERCEL);
+const runtimeDir = isVercel ? path.join('/tmp', 'baekhawhom') : __dirname;
+const uploadsDir = isVercel
+  ? path.join(runtimeDir, 'uploads')
+  : path.join(web, 'uploads');
+const dataDir = isVercel ? runtimeDir : path.join(__dirname, 'data');
 const settingsFile = path.join(dataDir, 'site-settings.json');
 
 fs.mkdirSync(uploadsDir, { recursive: true });
@@ -242,4 +248,14 @@ app.get('/accounts', (_req, res) => res.sendFile(path.join(web, 'accounts.html')
 app.get('/admin/accounts', (_req, res) => res.sendFile(path.join(web, 'admin', 'accounts.html')));
 app.use(express.static(web));
 
-app.listen(port, '0.0.0.0', () => console.log('Web running on port ' + port));
+app.use((err, _req, res, _next) => {
+  console.error('Unhandled Express error:', err);
+  res.status(500).json({ error: 'Internal server error' });
+});
+
+// Export the Express app for Vercel Functions. Start a listener only locally.
+if (!process.env.VERCEL) {
+  app.listen(port, '0.0.0.0', () => console.log('Web running on port ' + port));
+}
+
+export default app;
