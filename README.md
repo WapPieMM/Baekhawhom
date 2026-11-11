@@ -1,18 +1,35 @@
 # ID Shop Website
 
-โปรเจกต์เว็บไซต์ขายไอดีเกม ธีม Creamy Gothic โทนขาวครีม เบจ และน้ำตาลหม่น
+หน้าเว็บขายไอดีเกมธีม Creamy Gothic พร้อมหน้าจัดการรายการไอดี
 
-## โครงสร้าง
-- `index.html` — หน้าเว็บหลัก
-- `assets/css/style.css` — สไตล์และ responsive layout
-- `assets/js/main.js` — JavaScript สำหรับ interactions เบื้องต้น
+## Routes
+- `/` — หน้าร้านและช่องทางติดต่อ
+- `/accounts` — แคตตาล็อกไอดี แยกหมวดและสถานะ
+- `/admin/accounts` — หลังบ้านสำหรับผู้ดูแล
 
-## เริ่มต้นใช้งาน
-เปิด `index.html` ในเว็บเบราว์เซอร์ได้ทันที
+## Account categories and status
+- หมวดหมู่: `chicken_skin` (ไอดีไก่สกิน), `normal` (ไอดีปกติ)
+- สถานะ: `available` (พร้อมขาย), `sold` (ขายแล้ว)
 
-## ก่อนเผยแพร่
-- เปลี่ยนชื่อร้านและข้อความ placeholder
-- ใส่ข้อมูลไอดี ราคา และรูปภาพจริง
-- เปลี่ยนช่องทางติดต่อเป็นบัญชีของร้าน
+## Run locally
+```bash
+npm install
+npm run dev
+```
+จากนั้นเปิด http://localhost:3000
 
-> เวอร์ชันเริ่มต้นเป็น static frontend ยังไม่มีระบบสมาชิก ฐานข้อมูล หรือหลังบ้านจัดการสินค้า
+## Supabase setup
+1. สร้าง Supabase project
+2. รัน SQL ใน `supabase/migrations/20261111_account_categories.sql` ผ่าน SQL Editor
+3. ใส่ Project URL และ anon/publishable key ใน `public/assets/js/config.js`
+4. สร้างผู้ใช้ผ่าน Supabase Authentication
+5. กำหนด `app_metadata.role = admin` ให้บัญชีผู้ดูแลผ่านช่องทางที่ปลอดภัย (เช่น Supabase Dashboard หรือ server-side Admin API) เพื่อให้ผ่าน RLS policy
+6. เปิด `/admin/accounts` แล้วเข้าสู่ระบบ
+
+**ห้ามใส่ service_role key ลงใน frontend หรือ commit ลง GitHub**
+
+## Notes
+- รายการที่เพิ่มหรือแก้ไขในหลังบ้านจะอ่านจาก Supabase และแสดงใน `/accounts`
+- ผู้เข้าชมอ่านรายการได้เท่านั้น การเพิ่ม/แก้ไข/ลบ และอัปโหลดรูปถูกจำกัดด้วย Supabase RLS
+- เปลี่ยนชื่อร้านและข้อมูลติดต่อใน `public/index.html` ก่อนเผยแพร่
+- ระบบนี้ยังเป็น MVP สำหรับจัดการสินค้า ไม่ได้รวมระบบชำระเงินหรือการส่งมอบบัญชีอัตโนมัติ
