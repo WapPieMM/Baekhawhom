@@ -1,15 +1,280 @@
 <!doctype html>
-<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f5f0e9"><title>จัดการไอดี | Baekhawhom Admin</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Prompt:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="/assets/js/config.js"></script><link rel="stylesheet" href="/assets/css/admin.css"><script defer src="/assets/js/admin-accounts.js"></script></head>
-<body><main class="admin-shell"><header class="admin-head"><a href="/">← กลับหน้าร้าน</a><div><span class="eyebrow">BAEKHAWHOM · CONTROL PANEL</span><h1>จัดการ Account</h1></div><button id="logoutBtn" class="button ghost" hidden>ออกจากระบบ</button></header>
-<section id="loginPanel" class="panel login-panel"><h2>เข้าสู่ระบบผู้ดูแล</h2><p>ใช้บัญชีผู้ดูแลที่กำหนดสิทธิ์ admin ใน Supabase</p><form id="loginForm"><label>อีเมล<input name="email" type="email" required autocomplete="username"></label><label>รหัสผ่าน<input name="password" type="password" required autocomplete="current-password"></label><button class="button" type="submit">เข้าสู่ระบบ</button><p class="message" id="loginMessage" role="status"></p></form></section>
-<section id="managerPanel" hidden>
-<div class="stats"><article class="panel"><small>ไอดีทั้งหมด</small><strong id="totalCount">0</strong></article><article class="panel"><small>พร้อมขาย</small><strong id="availableCount">0</strong></article><article class="panel"><small>ขายแล้ว</small><strong id="soldCount">0</strong></article></div>
-<div class="manager-layout"><section class="panel"><div class="panel-title"><h2 id="formTitle">เพิ่มไอดีใหม่</h2><button id="resetBtn" class="button ghost" type="button">ล้างฟอร์ม</button></div>
-<form id="accountForm"><input type="hidden" name="id"><label>ชื่อไอดี<input name="title" maxlength="100" required placeholder="เช่น ไอดีสกินหายาก"></label>
-<div class="form-row"><label>หมวดหมู่<select name="category"><option value="chicken_skin">ไอดีไก่สกิน</option><option value="normal">ไอดีปกติ</option></select></label><label>สถานะ<select name="status"><option value="available">พร้อมขาย</option><option value="sold">ขายแล้ว</option></select></label></div>
-<label>ราคา (บาท)<input name="price" type="number" min="0" step="0.01" required value="0"></label><label>รายละเอียด<textarea name="description" rows="4" maxlength="1500" placeholder="รายละเอียดไอดี"></textarea></label><label>รูปภาพไอดี<input name="image_file" type="file" accept="image/png,image/jpeg,image/webp"><small>อัปโหลด JPG, PNG หรือ WebP ไม่เกิน 5 MB</small></label><input type="hidden" name="image_url"><div class="form-actions"><button class="button" type="submit">บันทึกไอดี</button><p class="message" id="formMessage" role="status"></p></div></form></section>
-<section class="panel inventory"><div class="panel-title"><h2>รายการไอดีในร้าน</h2><button id="refreshBtn" class="button ghost" type="button">รีเฟรช</button></div><div class="filters"><select id="categoryFilter"><option value="">ทุกหมวดหมู่</option><option value="chicken_skin">ไอดีไก่สกิน</option><option value="normal">ไอดีปกติ</option></select><select id="statusFilter"><option value="">ทุกสถานะ</option><option value="available">พร้อมขาย</option><option value="sold">ขายแล้ว</option></select></div><div id="accountList" class="account-list"><p class="muted">กำลังโหลด...</p></div></section></div>
-<section class="panel contact-settings"><div class="panel-title"><h2>ช่องทางการติดต่อ</h2></div><p class="muted">แก้ไขลิงก์และชื่อบัญชีที่จะแสดงบนหน้าเว็บไซต์</p><form id="contactForm"><div class="form-row"><label>LINE URL<input name="line_url" type="url" placeholder="https://line.me/..."></label><label>ชื่อหรือไอดี LINE<input name="line_text" maxlength="100" placeholder="@yourline"></label></div><div class="form-row"><label>Instagram URL<input name="instagram_url" type="url" placeholder="https://www.instagram.com/..."></label><label>ชื่อบัญชี Instagram<input name="instagram_text" maxlength="100" placeholder="@yourinstagram"></label></div><div class="form-row"><label>Facebook URL<input name="facebook_url" type="url" placeholder="https://www.facebook.com/..."></label><label>ชื่อเพจ Facebook<input name="facebook_text" maxlength="100" placeholder="ชื่อเพจร้านค้า"></label></div><div class="form-actions"><button class="button" type="submit">บันทึกช่องทางติดต่อ</button><p class="message" id="contactMessage" role="status"></p></div></form></section></section>
-<footer>ข้อมูลรายการจะแสดงที่หน้า <a href="/accounts">/accounts</a> โดยอัตโนมัติ</footer></main></body></html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f5f0e9">
+  <title>จัดการเว็บไซต์ &amp; เปลี่ยนรูปหน้าแรก | Baekhawhom Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400&family=Prompt:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/config.js"></script>
+  <link rel="stylesheet" href="/assets/css/admin.css">
+  <script defer src="/assets/js/admin-accounts.js"></script>
+</head>
+<body>
+  <main class="admin-shell">
+    <header class="admin-head">
+      <a class="back-link" href="/">← กลับไปดูหน้าแรกของร้าน</a>
+      <div>
+        <span class="eyebrow">BAEKHAWHOM · STUDIO BACKOFFICE</span>
+        <h1>ระบบจัดการร้าน &amp; เปลี่ยนรูปหน้าเว็บ</h1>
+      </div>
+      <button id="logoutBtn" class="button ghost" type="button" hidden>ออกจากระบบ</button>
+    </header>
+
+    <!-- Login Panel (with Quick Access option) -->
+    <section id="loginPanel" class="panel login-panel">
+      <h2>เข้าสู่ระบบผู้ดูแล</h2>
+      <p>เข้าสู่ระบบด้วยบัญชี Admin หรือคลิกปุ่มจัดการหน้าเว็บด่วนด้านล่างเพื่อเปลี่ยนรูปหน้าแรกได้ทันที</p>
+      <form id="loginForm">
+        <label>อีเมล
+          <input name="email" type="email" required autocomplete="username" placeholder="admin@example.com">
+        </label>
+        <label>รหัสผ่าน
+          <input name="password" type="password" required autocomplete="current-password" placeholder="••••••••">
+        </label>
+        <div class="login-actions">
+          <button class="button" type="submit">เข้าสู่ระบบ Supabase</button>
+          <button class="button secondary" type="button" id="quickAccessBtn">เข้าโหมดจัดการหน้าเว็บทันที ✦</button>
+        </div>
+        <p class="message" id="loginMessage" role="status"></p>
+      </form>
+    </section>
+
+    <!-- Main Admin Manager Panel -->
+    <section id="managerPanel" hidden>
+      <!-- Stats Overview -->
+      <div class="stats">
+        <article class="panel stat-card">
+          <small>ไอดีทั้งหมดในระบบ</small>
+          <strong id="totalCount">0</strong>
+        </article>
+        <article class="panel stat-card">
+          <small>สถานะพร้อมขาย</small>
+          <strong id="availableCount">0</strong>
+        </article>
+        <article class="panel stat-card">
+          <small>ขายแล้ว</small>
+          <strong id="soldCount">0</strong>
+        </article>
+      </div>
+
+      <!-- SECTION 1: Homepage Image & Theme Customizer -->
+      <section class="panel theme-customizer-panel">
+        <div class="panel-title">
+          <div>
+            <h2>✦ ตั้งค่ารูปภาพและข้อความหน้าแรก (Homepage Customizer)</h2>
+            <p class="muted">อัปโหลดรูปใหม่จากเครื่องหรือวาง URL รูปภาพเพื่อเปลี่ยนรูปนางแบบ ตุ๊กตากระต่าย และพื้นหลังหน้าแรกได้ทันที</p>
+          </div>
+          <button id="resetThemeBtn" class="button ghost" type="button">รีเซ็ตเป็นรูปต้นฉบับ</button>
+        </div>
+
+        <form id="themeForm">
+          <div class="hero-slots-grid">
+            <!-- Slot 1: Winged Pearl Heart Profile Frame -->
+            <div class="image-slot-card">
+              <div class="slot-preview slot-preview-winged">
+                <div class="winged-profile-frame admin-size">
+                  <div class="winged-profile-photo-clip">
+                    <img id="previewHeroGirl" src="/assets/images/theme/hero_girl.jpg" alt="ตัวอย่างรูปโปรไฟล์ในกรอบหัวใจมุก" referrerpolicy="no-referrer">
+                  </div>
+                  <img class="winged-frame-overlay" src="/assets/images/theme/winged_heart_frame.png" alt="" aria-hidden="true">
+                </div>
+              </div>
+              <div class="slot-controls">
+                <strong>1. รูปโปรไฟล์ในกรอบหัวใจมุกติดปีก (Profile Picture)</strong>
+                <label class="file-upload-label">
+                  <span>เลือกรูปโปรไฟล์จากเครื่อง</span>
+                  <input type="file" id="fileHeroGirl" accept="image/png,image/jpeg,image/webp">
+                </label>
+                <label>หรือระบุลิงก์รูปภาพ (URL)
+                  <input type="text" name="hero_girl_url" placeholder="/assets/images/theme/hero_girl.jpg">
+                </label>
+              </div>
+            </div>
+
+            <!-- Slot 2: Right Bunny Mascot -->
+            <div class="image-slot-card">
+              <div class="slot-preview">
+                <img id="previewHeroBunny" src="/assets/images/theme/hero_bunny.jpg" alt="ตัวอย่างรูปฝั่งขวา" referrerpolicy="no-referrer">
+              </div>
+              <div class="slot-controls">
+                <strong>2. รูปมาสคอตฝั่งขวา (Bunny Mascot)</strong>
+                <label class="file-upload-label">
+                  <span>เลือกรูปอัปโหลดจากเครื่อง</span>
+                  <input type="file" id="fileHeroBunny" accept="image/png,image/jpeg,image/webp">
+                </label>
+                <label>หรือระบุลิงก์รูปภาพ (URL)
+                  <input type="text" name="hero_bunny_url" placeholder="/assets/images/theme/hero_bunny.jpg">
+                </label>
+              </div>
+            </div>
+
+            <!-- Slot 3: Hero Background -->
+            <div class="image-slot-card">
+              <div class="slot-preview">
+                <img id="previewHeroBg" src="/src/assets/images/hero_creamy_gothic_banner_1794387724797.jpg" alt="ตัวอย่างพื้นหลัง" referrerpolicy="no-referrer">
+              </div>
+              <div class="slot-controls">
+                <strong>3. รูปพื้นหลัง Hero (Background)</strong>
+                <label class="file-upload-label">
+                  <span>เลือกรูปอัปโหลดจากเครื่อง</span>
+                  <input type="file" id="fileHeroBg" accept="image/png,image/jpeg,image/webp">
+                </label>
+                <label>หรือระบุลิงก์รูปภาพ (URL)
+                  <input type="text" name="hero_bg_url" placeholder="/src/assets/images/...">
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row four-cols">
+            <label>ชื่อร้านบนหน้าแรก
+              <input name="shop_name" maxlength="60" placeholder="Baekhawhom">
+            </label>
+            <label>ข้อความบรรทัดรอง (Subtitle)
+              <input name="shop_subtitle" maxlength="100" placeholder="ROV ✦ ID RENTAL SHOP">
+            </label>
+            <label>คำขวัญ / สโลแกนร้าน
+              <input name="shop_quote" maxlength="160" placeholder="“บริการดี ซื่อสัตย์ ปลอดภัย ยินดีให้บริการค่ะ ♡”">
+            </label>
+            <label>ป้ายสถานะมุมขวาบน
+              <input name="shop_status" maxlength="40" placeholder="เปิดให้บริการ">
+            </label>
+          </div>
+
+          <div class="form-actions">
+            <button class="button" type="submit">บันทึกการตั้งค่าหน้าแรก ♡</button>
+            <a class="button ghost" href="/" target="_blank">เปิดดูหน้าแรก ↗</a>
+            <p class="message" id="themeMessage" role="status"></p>
+          </div>
+        </form>
+      </section>
+
+      <!-- SECTION 2: Account & Card Image Manager -->
+      <div class="manager-layout">
+        <section class="panel">
+          <div class="panel-title">
+            <h2 id="formTitle">เพิ่ม / แก้ไขไอดีและรูปการ์ด</h2>
+            <button id="resetBtn" class="button ghost" type="button">ล้างฟอร์ม</button>
+          </div>
+
+          <form id="accountForm">
+            <input type="hidden" name="id">
+            <label>ชื่อไอดี
+              <input name="title" maxlength="100" required placeholder="เช่น ไอดีสายฟ้าสุดพิเศษ">
+            </label>
+
+            <div class="form-row">
+              <label>หมวดหมู่
+                <select name="category">
+                  <option value="chicken_skin">ไอดีไก่สกิน</option>
+                  <option value="normal">ไอดีปกติ</option>
+                </select>
+              </label>
+              <label>สถานะ
+                <select name="status">
+                  <option value="available">พร้อมขาย</option>
+                  <option value="sold">ขายแล้ว</option>
+                </select>
+              </label>
+            </div>
+
+            <label>ราคา (บาท)
+              <input name="price" type="number" min="0" step="1" required value="299">
+            </label>
+
+            <label>รายละเอียดไอดี
+              <textarea name="description" rows="3" maxlength="1500" placeholder="รายละเอียดสกิน แรงก์ หรือรูนของไอดี"></textarea>
+            </label>
+
+            <div class="account-img-upload-box">
+              <img id="accountFormPreview" src="/assets/images/theme/card_portrait_1.jpg" alt="ตัวอย่างรูปการ์ด" referrerpolicy="no-referrer">
+              <div>
+                <label>อัปโหลดรูปภาพการ์ดไอดี
+                  <input name="image_file" id="accountImageFile" type="file" accept="image/png,image/jpeg,image/webp">
+                  <small>รองรับไฟล์ JPG, PNG หรือ WebP (เปลี่ยนรูปการ์ดได้ทันที)</small>
+                </label>
+                <label>หรือใส่ลิงก์รูปภาพโดยตรง
+                  <input name="image_url" id="accountImageUrlInput" type="text" placeholder="/assets/images/theme/card_portrait_1.jpg">
+                </label>
+              </div>
+            </div>
+
+            <div class="form-actions">
+              <button class="button" type="submit">บันทึกรายการไอดี</button>
+              <p class="message" id="formMessage" role="status"></p>
+            </div>
+          </form>
+        </section>
+
+        <section class="panel inventory">
+          <div class="panel-title">
+            <h2>รายการไอดีที่แสดงหน้าเว็บ</h2>
+            <button id="refreshBtn" class="button ghost" type="button">รีเฟรช</button>
+          </div>
+          <div class="filters">
+            <select id="categoryFilter">
+              <option value="">ทุกหมวดหมู่</option>
+              <option value="chicken_skin">ไอดีไก่สกิน</option>
+              <option value="normal">ไอดีปกติ</option>
+            </select>
+            <select id="statusFilter">
+              <option value="">ทุกสถานะ</option>
+              <option value="available">พร้อมขาย</option>
+              <option value="sold">ขายแล้ว</option>
+            </select>
+          </div>
+          <div id="accountList" class="account-list">
+            <p class="muted">กำลังโหลด...</p>
+          </div>
+        </section>
+      </div>
+
+      <!-- SECTION 3: Contact Settings -->
+      <section class="panel contact-settings">
+        <div class="panel-title">
+          <h2>ช่องทางการติดต่อ (กรอบซ้ายล่างหน้าแรก)</h2>
+        </div>
+        <p class="muted">แก้ไขลิงก์และชื่อบัญชี LINE, Instagram, Facebook ที่จะแสดงในกรอบช่องทางติดต่อบนหน้าเว็บไซต์</p>
+        <form id="contactForm">
+          <div class="form-row">
+            <label>LINE URL
+              <input name="line_url" type="url" placeholder="https://line.me/...">
+            </label>
+            <label>ชื่อหรือไอดี LINE
+              <input name="line_text" maxlength="100" placeholder="@baekhawhom">
+            </label>
+          </div>
+          <div class="form-row">
+            <label>Instagram URL
+              <input name="instagram_url" type="url" placeholder="https://www.instagram.com/...">
+            </label>
+            <label>ชื่อบัญชี Instagram
+              <input name="instagram_text" maxlength="100" placeholder="baekhawhom">
+            </label>
+          </div>
+          <div class="form-row">
+            <label>Facebook URL
+              <input name="facebook_url" type="url" placeholder="https://www.facebook.com/...">
+            </label>
+            <label>ชื่อเพจ Facebook
+              <input name="facebook_text" maxlength="100" placeholder="baekhawhom">
+            </label>
+          </div>
+          <div class="form-actions">
+            <button class="button" type="submit">บันทึกช่องทางติดต่อ</button>
+            <p class="message" id="contactMessage" role="status"></p>
+          </div>
+        </form>
+      </section>
+    </section>
+
+    <footer>
+      ข้อมูลและรูปภาพที่บันทึกจะอัปเดตไปที่ <a href="/">หน้าแรก (/)</a> และหน้า <a href="/accounts">/accounts</a> โดยอัตโนมัติ
+    </footer>
+  </main>
+</body>
+</html>

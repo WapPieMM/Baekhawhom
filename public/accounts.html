@@ -1,10 +1,110 @@
 <!doctype html>
-<html lang="th"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#f5f0e9"><title>รายการไอดี | Baekhawhom</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Prompt:wght@300;400;500&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script><script src="/assets/js/config.js"></script><link rel="stylesheet" href="/assets/css/accounts.css"><script defer src="/assets/js/accounts.js"></script></head>
-<body><div class="shop-wrap"><header><a class="brand" href="/">Baekhawhom <span>✦</span></a><nav><a href="/">หน้าหลัก</a><a href="/accounts" aria-current="page">รายการไอดี</a><a href="/#contact">ติดต่อร้าน</a></nav></header>
-<main><section class="intro"><p class="eyebrow">OUR ACCOUNT COLLECTION</p><h1>รายการไอดี <span>♡</span></h1><p>เลือกชมไอดีที่คุณกำลังมองหา</p></section>
-<section class="catalog"><div class="category-tabs" role="group" aria-label="เลือกหมวดหมู่"><button class="active" data-category="all">ทั้งหมด</button><button data-category="chicken_skin">ไอดีไก่สกิน</button><button data-category="normal">ไอดีปกติ</button></div>
-<div class="status-tabs" role="group" aria-label="เลือกสถานะ"><button class="active" data-status="available">พร้อมขาย <span id="availableCount">0</span></button><button data-status="sold">ขายแล้ว <span id="soldCount">0</span></button></div>
-<p class="result-count" id="resultCount">กำลังโหลดรายการ...</p><div id="accountGrid" class="grid"><p class="empty">กำลังโหลดรายการไอดี ♡</p></div></section></main>
-<footer>❦ ───── ✧ ───── ❦<p>Baekhawhom · GAME ACCOUNT SHOP</p></footer></div></body></html>
+<html lang="th">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#f5f0e9">
+  <title>รายการไอดี | Baekhawhom</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,500;0,600;1,400;1,600&family=Prompt:wght@300;400;500&display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="/assets/js/config.js"></script>
+  <link rel="stylesheet" href="/assets/css/accounts.css">
+  <script defer src="/assets/js/accounts.js"></script>
+</head>
+<body>
+  <div class="shop-wrap">
+    <!-- 3-Zone Top Bar Contract -->
+    <header class="topbar">
+      <a class="brand" href="/">Baekhawhom</a>
+      <nav aria-label="เมนูหลัก">
+        <a href="/">หน้าหลัก</a>
+        <a href="/accounts" aria-current="page">รายการไอดี</a>
+        <a href="/#contact">ติดต่อร้าน</a>
+      </nav>
+      <a class="topbar-cta" href="/#contact">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+        </svg>
+        <span>ติดต่อสั่งซื้อ</span>
+      </a>
+    </header>
+
+    <main>
+      <section class="intro">
+        <div class="intro-inner">
+          <div class="intro-copy">
+            <p class="eyebrow">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" aria-hidden="true">
+                <path d="M12 2L14.8 9.2L22 12L14.8 14.8L12 22L9.2 14.8L2 12L9.2 9.2L12 2Z"/>
+              </svg>
+              Our Account Collection
+            </p>
+            <h1>คลังรายการไอดีทั้งหมด</h1>
+            <p>เลือกหมวดหมู่และสถานะของไอดีที่คุณกำลังมองหา พร้อมรูปภาพและรายละเอียดครบถ้วน</p>
+          </div>
+          <div class="intro-badge">
+            <div class="winged-profile-frame badge-size">
+              <div class="winged-profile-photo-clip">
+                <img
+                  id="badgeProfileImg"
+                  src="/assets/images/theme/hero_girl.jpg"
+                  alt="ตราสัญลักษณ์ร้าน Baekhawhom"
+                  referrerpolicy="no-referrer"
+                  onerror="this.onerror=null;this.src='/src/assets/images/shop_curator_avatar_1794387730456.jpg';"
+                >
+              </div>
+              <img
+                class="winged-frame-overlay"
+                src="/assets/images/theme/winged_heart_frame.png"
+                alt=""
+                aria-hidden="true"
+              >
+            </div>
+            <div>
+              <strong>Baekhawhom Verified</strong>
+              <span>รับประกันข้อมูลปลอดภัยทุกไอดี</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="catalog">
+        <div class="toolbar-row">
+          <div class="category-tabs" role="group" aria-label="เลือกหมวดหมู่">
+            <button type="button" class="active" data-category="all">ทั้งหมด</button>
+            <button type="button" data-category="chicken_skin">ไอดีไก่สกิน</button>
+            <button type="button" data-category="normal">ไอดีปกติ</button>
+          </div>
+
+          <div class="status-tabs" role="group" aria-label="เลือกสถานะ">
+            <button type="button" class="active" data-status="available">
+              พร้อมขาย (<span id="availableCount">0</span>)
+            </button>
+            <button type="button" data-status="sold">
+              ขายแล้ว (<span id="soldCount">0</span>)
+            </button>
+          </div>
+        </div>
+
+        <p class="result-count" id="resultCount">กำลังโหลดรายการ...</p>
+        <div id="accountGrid" class="grid">
+          <p class="empty">กำลังโหลดรายการไอดี...</p>
+        </div>
+      </section>
+    </main>
+
+    <footer>
+      <div class="footer-ornament" aria-hidden="true">
+        <svg width="110" height="14" viewBox="0 0 110 14" fill="none" stroke="currentColor" stroke-width="1.2">
+          <line x1="0" y1="7" x2="42" y2="7"/>
+          <path d="M55 2L59 7L55 12L51 7L55 2Z"/>
+          <line x1="68" y1="7" x2="110" y2="7"/>
+        </svg>
+      </div>
+      <p>BAEKHAWHOM · CREAMY GOTHIC GAME ACCOUNT SHOP</p>
+    </footer>
+  </div>
+</body>
+</html>
