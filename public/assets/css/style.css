@@ -72,29 +72,86 @@ button {
   width: 100%;
   display: block;
   user-select: none;
-  filter: drop-shadow(0 12px 24px rgba(79, 66, 59, 0.14));
-  transition: transform 280ms var(--ease-out);
-}
-
-.winged-profile-frame:hover {
-  transform: translateY(-3px) scale(1.015);
+  perspective: 950px;
+  transform-style: preserve-3d;
+  filter: drop-shadow(0 16px 30px rgba(79, 66, 59, 0.16));
+  will-change: transform;
 }
 
 .winged-profile-frame.hero-size {
-  width: clamp(280px, 38vw, 420px);
-  max-width: 420px;
-  margin: 0 auto -8px;
+  width: clamp(340px, 64vw, 680px);
+  max-width: 680px;
+  margin: -6px auto -18px;
 }
 
 .winged-profile-frame.card-size {
-  max-width: 248px;
+  max-width: 268px;
   margin: -6px auto 4px;
+}
+
+.winged-part {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  pointer-events: none;
+  z-index: 1;
+  display: block;
+  will-change: transform;
+  transform-style: preserve-3d;
+  backface-visibility: visible;
+}
+
+.winged-part.wing-left {
+  transform-origin: 33.2% 46.5%;
+  animation: wingFlapLeft3D 3.2s cubic-bezier(0.42, 0, 0.58, 1) infinite;
+}
+
+.winged-part.wing-right {
+  transform-origin: 66.8% 46.5%;
+  animation: wingFlapRight3D 3.2s cubic-bezier(0.42, 0, 0.58, 1) infinite;
+}
+
+/* When JS 60fps physics loop is active, disable CSS animation so rAF drives smooth 60fps harmonic transforms */
+.winged-profile-frame.js-raf-active .winged-part {
+  animation: none;
+}
+
+@keyframes wingFlapLeft3D {
+  0%, 100% {
+    transform: perspective(950px) rotateY(-6deg) rotateZ(-3.2deg) scaleX(1.01) translateZ(0);
+  }
+  25% {
+    transform: perspective(950px) rotateY(10deg) rotateZ(1.8deg) skewY(1.2deg) scaleX(0.985) translateZ(0);
+  }
+  50% {
+    transform: perspective(950px) rotateY(24deg) rotateZ(5.2deg) skewY(2.2deg) scaleX(0.955) translateZ(0);
+  }
+  75% {
+    transform: perspective(950px) rotateY(7deg) rotateZ(-1.4deg) skewY(-0.8deg) scaleX(0.99) translateZ(0);
+  }
+}
+
+@keyframes wingFlapRight3D {
+  0%, 100% {
+    transform: perspective(950px) rotateY(6deg) rotateZ(3.2deg) scaleX(1.01) translateZ(0);
+  }
+  25% {
+    transform: perspective(950px) rotateY(-10deg) rotateZ(-1.8deg) skewY(-1.2deg) scaleX(0.985) translateZ(0);
+  }
+  50% {
+    transform: perspective(950px) rotateY(-24deg) rotateZ(-5.2deg) skewY(-2.2deg) scaleX(0.955) translateZ(0);
+  }
+  75% {
+    transform: perspective(950px) rotateY(-7deg) rotateZ(1.4deg) skewY(0.8deg) scaleX(0.99) translateZ(0);
+  }
 }
 
 .winged-profile-photo-clip {
   position: absolute;
   inset: 0;
-  z-index: 1;
+  z-index: 2;
   clip-path: var(--winged-heart-clip);
   -webkit-clip-path: var(--winged-heart-clip);
   background: #e8ddd1;
@@ -124,7 +181,7 @@ button {
   height: 100%;
   object-fit: contain;
   pointer-events: none;
-  z-index: 2;
+  z-index: 3;
   display: block;
 }
 

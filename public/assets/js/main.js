@@ -15,6 +15,139 @@
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
     );
 
+  // 60fps Realistic 3D Wing Kinematics Engine (multi-harmonic figure-8 stroke + hover response)
+  function initRealisticWingPhysics60fps() {
+    if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
+      return;
+    }
+
+    const frames = Array.from(document.querySelectorAll(".winged-profile-frame"));
+    const instances = frames
+      .map((frame, index) => {
+        const leftWing = frame.querySelector(".wing-left");
+        const rightWing = frame.querySelector(".wing-right");
+        if (!leftWing || !rightWing) return null;
+
+        frame.classList.add("js-raf-active");
+        const isHero = frame.classList.contains("hero-size");
+
+        const state = {
+          frame,
+          leftWing,
+          rightWing,
+          isHero,
+          phase: index * 1.1,
+          speed: isHero ? 2.45 : 2.15,
+          targetSpeed: isHero ? 2.45 : 2.15,
+          ampScale: 1.0,
+          targetAmpScale: 1.0,
+          pointerX: 0,
+          pointerY: 0,
+          smoothX: 0,
+          smoothY: 0
+        };
+
+        frame.addEventListener("pointerenter", () => {
+          state.targetSpeed = isHero ? 4.1 : 3.4;
+          state.targetAmpScale = 1.22;
+        });
+
+        frame.addEventListener("pointerleave", () => {
+          state.targetSpeed = isHero ? 2.45 : 2.15;
+          state.targetAmpScale = 1.0;
+          state.pointerX = 0;
+          state.pointerY = 0;
+        });
+
+        frame.addEventListener("pointermove", (e) => {
+          const rect = frame.getBoundingClientRect();
+          if (!rect.width || !rect.height) return;
+          state.pointerX = ((e.clientX - rect.left) / rect.width - 0.5) * 2;
+          state.pointerY = ((e.clientY - rect.top) / rect.height - 0.5) * 2;
+        });
+
+        return state;
+      })
+      .filter(Boolean);
+
+    if (!instances.length) return;
+
+    let lastTime = performance.now();
+
+    function step(now) {
+      const dt = Math.min(0.05, Math.max(0.001, (now - lastTime) * 0.001));
+      lastTime = now;
+
+      for (let i = 0; i < instances.length; i++) {
+        const inst = instances[i];
+        const damp = Math.min(1, dt * 6.5);
+
+        inst.speed += (inst.targetSpeed - inst.speed) * damp;
+        inst.ampScale += (inst.targetAmpScale - inst.ampScale) * damp;
+        inst.smoothX += (inst.pointerX - inst.smoothX) * damp;
+        inst.smoothY += (inst.pointerY - inst.smoothY) * damp;
+        inst.phase = (inst.phase + inst.speed * dt) % (Math.PI * 200);
+
+        const p = inst.phase;
+        const amp = inst.ampScale;
+
+        // Primary stroke + 2nd harmonic (asymmetric downstroke/upstroke) + figure-8 pitch wave
+        const s1 = Math.sin(p);
+        const s2 = Math.sin(p * 2 - 0.55) * 0.24;
+        const c1 = Math.cos(p - 0.4);
+        const ripple = Math.sin(p * 3 + 0.3) * 0.12;
+
+        const stroke = (s1 + s2) * amp;
+        const feather = (c1 + ripple) * amp;
+
+        // 3D angles for left & right wings
+        const leftRotY = (8.5 + stroke * 17.5 + inst.smoothX * 4).toFixed(2);
+        const rightRotY = (-8.5 - stroke * 17.5 + inst.smoothX * 4).toFixed(2);
+
+        const leftRotZ = (feather * 4.6 + stroke * 2.2 - inst.smoothY * 2).toFixed(2);
+        const rightRotZ = (-feather * 4.6 - stroke * 2.2 + inst.smoothY * 2).toFixed(2);
+
+        const leftSkewY = (feather * 1.9).toFixed(2);
+        const rightSkewY = (-feather * 1.9).toFixed(2);
+
+        const scaleX = (1 - Math.max(0, s1) * 0.036 * amp).toFixed(4);
+
+        inst.leftWing.style.transform =
+          "perspective(950px) rotateY(" +
+          leftRotY +
+          "deg) rotateZ(" +
+          leftRotZ +
+          "deg) skewY(" +
+          leftSkewY +
+          "deg) scaleX(" +
+          scaleX +
+          ") translateZ(0)";
+
+        inst.rightWing.style.transform =
+          "perspective(950px) rotateY(" +
+          rightRotY +
+          "deg) rotateZ(" +
+          rightRotZ +
+          "deg) skewY(" +
+          rightSkewY +
+          "deg) scaleX(" +
+          scaleX +
+          ") translateZ(0)";
+
+        if (inst.isHero) {
+          const floatY = (-Math.sin(p - 0.55) * 4.2 - inst.smoothY * 2.5).toFixed(2);
+          inst.frame.style.transform = "translate3d(0, " + floatY + "px, 0)";
+        }
+      }
+
+      requestAnimationFrame(step);
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  initRealisticWingPhysics60fps();
+
   // Smooth anchor scrolling
   document.addEventListener("click", (event) => {
     const link = event.target.closest('a[href^="#"]');
