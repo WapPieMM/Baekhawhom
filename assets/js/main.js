@@ -15,6 +15,120 @@
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
     );
 
+  // 5-Branch Candelabra Entry Loading Screen (Candles light 1 -> 5 with progress bar + 60fps Gothic flame physics)
+  function initCandelabraLoader() {
+    const loader = document.getElementById("candelabraLoader");
+    if (!loader) return;
+
+    const fillEl = document.getElementById("loaderBarFill");
+    const percentEl = document.getElementById("loaderPercentText");
+    const statusEl = document.getElementById("loaderStatusLabel");
+    const candleSlots = Array.from(loader.querySelectorAll(".candle-flame-slot"));
+    const ticks = Array.from(loader.querySelectorAll(".loader-candle-ticks .tick"));
+    const thresholds = [16, 36, 56, 76, 92];
+
+    let progress = 0;
+    let finishing = false;
+    let finishTime = 0;
+    let pageReady = document.readyState === "complete";
+    window.addEventListener(
+      "load",
+      () => {
+        pageReady = true;
+      },
+      { once: true }
+    );
+
+    const startTime = performance.now();
+    const minDuration = 2250;
+
+    function updateFlamePhysics(now) {
+      const t = now * 0.001;
+      for (let i = 0; i < candleSlots.length; i++) {
+        const slot = candleSlots[i];
+        if (!slot || !slot.classList.contains("is-lit")) continue;
+        const seed = i * 1.73 + 0.4;
+        const wind =
+          Math.sin(t * 5.4 + seed) * 2.1 +
+          Math.sin(t * 11.8 + seed * 1.9) * 1.15 +
+          Math.cos(t * 2.7 - seed) * 0.85;
+        const stretch =
+          1 +
+          Math.sin(t * 8.6 + seed * 1.3) * 0.048 +
+          Math.cos(t * 15.2 + seed) * 0.024;
+        const halo =
+          0.92 +
+          Math.sin(t * 7.2 + seed) * 0.08 +
+          Math.sin(t * 13.5 + seed * 2.1) * 0.04;
+
+        slot.style.setProperty("--flicker-lean", wind.toFixed(2) + "deg");
+        slot.style.setProperty("--flicker-stretch", stretch.toFixed(3));
+        slot.style.setProperty("--halo-Dynamic", halo.toFixed(3));
+      }
+    }
+
+    function updateUI(pct) {
+      const clamped = Math.max(0, Math.min(100, pct));
+      if (fillEl) fillEl.style.width = clamped.toFixed(1) + "%";
+      if (percentEl) percentEl.textContent = Math.round(clamped) + "%";
+
+      let litCount = 0;
+      for (let i = 0; i < thresholds.length; i++) {
+        const isLit = clamped >= thresholds[i];
+        if (isLit) litCount++;
+        if (candleSlots[i]) candleSlots[i].classList.toggle("is-lit", isLit);
+        if (ticks[i]) ticks[i].classList.toggle("is-lit", isLit);
+      }
+
+      if (statusEl) {
+        statusEl.textContent =
+          litCount >= 5
+            ? "จุดเทียนครบทั้ง 5 เล่มแล้ว ยินดีต้อนรับค่ะ ♡"
+            : "กำลังจุดเทียนต้อนรับ... " + litCount + " / 5 เล่ม";
+      }
+    }
+
+    function step(now) {
+      const elapsed = now - startTime;
+      const timeRatio = Math.min(1, elapsed / minDuration);
+      const eased =
+        timeRatio < 0.5
+          ? 2 * timeRatio * timeRatio
+          : 1 - Math.pow(-2 * timeRatio + 2, 2) / 2;
+
+      const cap = pageReady ? 100 : 90;
+      const target = Math.min(cap, eased * 100);
+      progress += (target - progress) * 0.28;
+      if (pageReady && timeRatio >= 1) {
+        progress = 100;
+      }
+
+      updateUI(finishing ? 100 : progress);
+      updateFlamePhysics(now);
+
+      if (!finishing) {
+        if (progress >= 99.6) {
+          finishing = true;
+          finishTime = now;
+          updateUI(100);
+          setTimeout(() => {
+            loader.classList.add("is-complete");
+            setTimeout(() => {
+              loader.hidden = true;
+            }, 680);
+          }, 480);
+        }
+        requestAnimationFrame(step);
+      } else if (now - finishTime < 1150) {
+        requestAnimationFrame(step);
+      }
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  initCandelabraLoader();
+
   // 60fps Realistic 3D Wing Kinematics Engine (multi-harmonic figure-8 stroke + hover response)
   function initRealisticWingPhysics60fps() {
     if (window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches) {
