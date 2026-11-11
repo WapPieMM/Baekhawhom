@@ -33,3 +33,21 @@ create policy "Admins can update shop settings"
   on public.shop_settings for update to authenticated
   using ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin')
   with check ((auth.jwt() -> 'app_metadata' ->> 'role') = 'admin');
+
+
+-- Persist homepage theme image URLs and copy in Supabase (not Vercel's temporary filesystem).
+alter table public.shop_settings
+  add column if not exists hero_girl_url text not null default '',
+  add column if not exists hero_bunny_url text not null default '',
+  add column if not exists hero_bg_url text not null default '',
+  add column if not exists shop_name text not null default 'Baekhawhom',
+  add column if not exists shop_subtitle text not null default '',
+  add column if not exists shop_quote text not null default '',
+  add column if not exists shop_status text not null default 'เปิดให้บริการ';
+
+-- Allow admins to replace an image at the same object path if ever needed.
+drop policy if exists "Admins update account images" on storage.objects;
+create policy "Admins update account images"
+  on storage.objects for update to authenticated
+  using (bucket_id = 'account-images' and (auth.jwt() -> 'app_metadata' ->> 'role') = 'admin')
+  with check (bucket_id = 'account-images' and (auth.jwt() -> 'app_metadata' ->> 'role') = 'admin');
