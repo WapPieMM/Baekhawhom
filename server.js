@@ -1,0 +1,11 @@
+import express from 'express';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+const __dirname=path.dirname(fileURLToPath(import.meta.url));
+const app=express();
+const port=Number(process.env.PORT||3000);
+const web=path.join(__dirname,'public');
+app.get('/accounts',(_req,res)=>res.sendFile(path.join(web,'accounts.html')));
+app.get('/admin/accounts',(_req,res)=>res.sendFile(path.join(web,'admin','accounts.html')));
+app.use(express.static(web));
+app.listen(port,'0.0.0.0',()=>console.log('Web running on port '+port));
