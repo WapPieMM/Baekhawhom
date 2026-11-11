@@ -46,7 +46,7 @@
     if (!db || !isSupabaseAdmin) {
       throw new Error("กรุณาเข้าสู่ระบบด้วยบัญชี Admin ก่อนอัปโหลดรูป");
     }
-    if (!file || !/^image\\/(jpeg|png|webp)$/.test(file.type)) {
+    if (!file || !["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
       throw new Error("รองรับเฉพาะไฟล์ JPG, PNG หรือ WebP");
     }
     if (file.size > 5 * 1024 * 1024) {
