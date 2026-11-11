@@ -20,7 +20,7 @@ npm run dev
 
 ## Supabase setup
 1. สร้าง Supabase project
-2. รัน SQL ใน `supabase/migrations/20261111_account_categories.sql` ผ่าน SQL Editor
+2. รัน SQL ใน `supabase/migrations/20261111_account_categories.sql` และ `supabase/migrations/20261111_shop_contact_settings.sql` ผ่าน SQL Editor
 3. ใส่ Project URL และ anon/publishable key ใน `public/assets/js/config.js`
 4. สร้างผู้ใช้ผ่าน Supabase Authentication
 5. กำหนด `app_metadata.role = admin` ให้บัญชีผู้ดูแลผ่านช่องทางที่ปลอดภัย (เช่น Supabase Dashboard หรือ server-side Admin API) เพื่อให้ผ่าน RLS policy
