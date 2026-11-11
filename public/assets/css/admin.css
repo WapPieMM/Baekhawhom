@@ -337,7 +337,7 @@ textarea {
 
 .account-img-upload-box {
   display: grid;
-  grid-template-columns: 96px minmax(0, 1fr);
+  grid-template-columns: 168px minmax(0, 1fr);
   gap: 14px;
   align-items: center;
   padding: 12px;
@@ -347,12 +347,14 @@ textarea {
 }
 
 .account-img-upload-box img {
-  width: 96px;
-  height: 104px;
+  width: 168px;
+  aspect-ratio: 16 / 9;
+  height: auto;
   object-fit: cover;
   border-radius: 8px;
   border: 1px solid #c9b8a8;
   background: var(--beige);
+  display: block;
 }
 
 .form-actions {
@@ -383,7 +385,7 @@ textarea {
 
 .account-row {
   display: grid;
-  grid-template-columns: 68px minmax(0, 1fr) auto;
+  grid-template-columns: 118px minmax(0, 1fr) auto;
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
@@ -393,12 +395,14 @@ textarea {
 }
 
 .account-row img {
-  width: 68px;
-  height: 72px;
+  width: 118px;
+  aspect-ratio: 16 / 9;
+  height: auto;
   object-fit: cover;
   border-radius: 8px;
   background: var(--beige);
   border: 1px solid var(--line);
+  display: block;
 }
 
 .account-row h3 {

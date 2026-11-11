@@ -263,7 +263,7 @@
 
       <!-- Bottom Split Showcase: Left Contact Plaque + Right Featured Accounts Carousel -->
       <section class="lower-showcase-section" id="showcaseSection">
-        <div class="lower-showcase-grid">
+        <div class="lower-showcase-grid single-col-contact">
           <!-- Left: Ornate Contact Frame with Winged Pearl Heart Profile Avatar -->
           <aside class="contact-ornate-plaque" id="contactSection" aria-label="ช่องทางติดต่อร้าน">
             <div class="contact-top-bow" aria-hidden="true">
@@ -340,8 +340,8 @@
             </div>
           </aside>
 
-          <!-- Right: Featured Accounts Carousel -->
-          <div class="featured-accounts-area" id="accounts">
+          <!-- Right: Featured Accounts Carousel (Hidden automatically when no real accounts exist) -->
+          <div class="featured-accounts-area" id="accounts" hidden>
             <header class="featured-heading-bar">
               <span class="heading-line" aria-hidden="true"></span>
               <span class="heading-sparkle" aria-hidden="true">✦</span>
@@ -357,94 +357,7 @@
                 </svg>
               </button>
 
-              <div class="portrait-cards-grid" id="homeAccountGrid">
-                <!-- Card 1 -->
-                <article class="portrait-card">
-                  <span class="card-crown-badge" aria-hidden="true">♛</span>
-                  <div class="portrait-frame">
-                    <img
-                      src="/assets/images/theme/card_portrait_1.jpg"
-                      alt="ไอดีสายฟ้าสุดพิเศษ"
-                      referrerpolicy="no-referrer"
-                      loading="lazy"
-                      onerror="this.onerror=null;this.src='/src/assets/images/account_card_valkyrie_1794387727810.jpg';"
-                    >
-                  </div>
-                  <div class="portrait-card-info">
-                    <h3>ไอดีสายฟ้าสุดพิเศษ</h3>
-                    <strong class="portrait-price">฿ 299.-</strong>
-                    <button
-                      type="button"
-                      class="portrait-detail-btn"
-                      data-preview-title="ไอดีสายฟ้าสุดพิเศษ"
-                      data-preview-meta="พร้อมขาย · ไอดีปกติ · รหัส BKH-01"
-                      data-preview-price="฿ 299.-"
-                      data-preview-img="/assets/images/theme/card_portrait_1.jpg"
-                      data-preview-desc="ฮีโร่ครบ สกินลิมิเต็ดสายฟ้า พร้อมรูนครบชุด เปลี่ยนข้อมูลได้ทันที"
-                    >
-                      ดูรายละเอียด ♡
-                    </button>
-                  </div>
-                </article>
-
-                <!-- Card 2 -->
-                <article class="portrait-card">
-                  <span class="card-crown-badge" aria-hidden="true">♛</span>
-                  <div class="portrait-frame">
-                    <img
-                      src="/assets/images/theme/card_portrait_2.jpg"
-                      alt="ไอดีสายหวานน่ารัก"
-                      referrerpolicy="no-referrer"
-                      loading="lazy"
-                      onerror="this.onerror=null;this.src='/src/assets/images/account_card_celestial_1794387730417.jpg';"
-                    >
-                  </div>
-                  <div class="portrait-card-info">
-                    <h3>ไอดีสายหวานน่ารัก</h3>
-                    <strong class="portrait-price">฿ 199.-</strong>
-                    <button
-                      type="button"
-                      class="portrait-detail-btn"
-                      data-preview-title="ไอดีสายหวานน่ารัก"
-                      data-preview-meta="พร้อมขาย · ไอดีไก่สกิน · รหัส BKH-02"
-                      data-preview-price="฿ 199.-"
-                      data-preview-img="/assets/images/theme/card_portrait_2.jpg"
-                      data-preview-desc="ไอดีสกินแรร์สายหวาน มีสกินลิมิเต็ดหายาก ประวัติสะอาดพร้อมปั้น"
-                    >
-                      ดูรายละเอียด ♡
-                    </button>
-                  </div>
-                </article>
-
-                <!-- Card 3 -->
-                <article class="portrait-card">
-                  <span class="card-crown-badge" aria-hidden="true">♛</span>
-                  <div class="portrait-frame">
-                    <img
-                      src="/assets/images/theme/card_portrait_3.jpg"
-                      alt="ไอดีสายเท่โหดๆ"
-                      referrerpolicy="no-referrer"
-                      loading="lazy"
-                      onerror="this.onerror=null;this.src='/src/assets/images/account_card_nocturne_1794387729965.jpg';"
-                    >
-                  </div>
-                  <div class="portrait-card-info">
-                    <h3>ไอดีสายเท่โหดๆ</h3>
-                    <strong class="portrait-price">฿ 259.-</strong>
-                    <button
-                      type="button"
-                      class="portrait-detail-btn"
-                      data-preview-title="ไอดีสายเท่โหดๆ"
-                      data-preview-meta="พร้อมขาย · ไอดีปกติ · รหัส BKH-03"
-                      data-preview-price="฿ 259.-"
-                      data-preview-img="/assets/images/theme/card_portrait_3.jpg"
-                      data-preview-desc="ไอดีแรงก์สูง สกินสายดาร์กสุดเท่ พร้อมกรอบโปรไฟล์และเอฟเฟกต์ครบ"
-                    >
-                      ดูรายละเอียด ♡
-                    </button>
-                  </div>
-                </article>
-              </div>
+              <div class="portrait-cards-grid" id="homeAccountGrid"></div>
 
               <button type="button" class="carousel-arrow next" id="carouselNextBtn" aria-label="ดูไอดีถัดไป">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round">
@@ -455,7 +368,6 @@
 
             <div class="featured-bottom-actions">
               <a class="view-all-link" href="/accounts">ดูคลังไอดีทั้งหมด →</a>
-              <a class="admin-edit-shortcut" href="/admin/accounts">✦ ตั้งค่ารูปโปรไฟล์ / จัดการหลังบ้าน</a>
             </div>
           </div>
         </div>
@@ -503,6 +415,20 @@
       </div>
       <small>CREAMY GOTHIC GAME ACCOUNT SHOP · MADE WITH LOVE ♡</small>
     </footer>
+
+    <!-- Back to Top Floating Button -->
+    <button
+      type="button"
+      class="back-to-top-btn"
+      id="backToTopBtn"
+      aria-label="กลับขึ้นด้านบน"
+      title="กลับขึ้นด้านบน"
+    >
+      <span class="back-to-top-sparkle" aria-hidden="true">✦</span>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+        <path d="m18 15-6-6-6 6"/>
+      </svg>
+    </button>
   </div>
 </body>
 </html>

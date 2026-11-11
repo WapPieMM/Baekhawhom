@@ -39,38 +39,7 @@ const DEFAULT_SETTINGS = {
   instagram_text: 'baekhawhom',
   facebook_url: 'https://www.facebook.com/',
   facebook_text: 'baekhawhom',
-  featured_accounts: [
-    {
-      id: 1,
-      title: 'ไอดีสายฟ้าสุดพิเศษ',
-      category: 'normal',
-      status: 'available',
-      price: 299,
-      description: 'ฮีโร่ครบ สกินลิมิเต็ดสายฟ้า พร้อมรูนครบชุด เปลี่ยนข้อมูลได้ทันที',
-      image_url: '/assets/images/theme/card_portrait_1.jpg',
-      created_at: '2026-11-11T00:00:00.000Z'
-    },
-    {
-      id: 2,
-      title: 'ไอดีสายหวานน่ารัก',
-      category: 'chicken_skin',
-      status: 'available',
-      price: 199,
-      description: 'ไอดีสกินแรร์สายหวาน มีสกินลิมิเต็ดหายาก ประวัติสะอาดพร้อมปั้น',
-      image_url: '/assets/images/theme/card_portrait_2.jpg',
-      created_at: '2026-11-11T00:01:00.000Z'
-    },
-    {
-      id: 3,
-      title: 'ไอดีสายเท่โหดๆ',
-      category: 'normal',
-      status: 'available',
-      price: 259,
-      description: 'ไอดีแรงก์สูง สกินสายดาร์กสุดเท่ พร้อมกรอบโปรไฟล์และเอฟเฟกต์ครบ',
-      image_url: '/assets/images/theme/card_portrait_3.jpg',
-      created_at: '2026-11-11T00:02:00.000Z'
-    }
-  ]
+  featured_accounts: []
 };
 
 function loadSettings() {

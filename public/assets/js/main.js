@@ -133,11 +133,6 @@
           "deg) scaleX(" +
           scaleX +
           ") translateZ(0)";
-
-        if (inst.isHero) {
-          const floatY = (-Math.sin(p - 0.55) * 4.2 - inst.smoothY * 2.5).toFixed(2);
-          inst.frame.style.transform = "translate3d(0, " + floatY + "px, 0)";
-        }
       }
 
       requestAnimationFrame(step);
@@ -147,6 +142,302 @@
   }
 
   initRealisticWingPhysics60fps();
+
+  // Subtle Scroll-Reveal Animation via IntersectionObserver API
+  let scrollRevealObserver = null;
+
+  function observeRevealElements(elements) {
+    if (!elements || !elements.length) return;
+    const reduceMotion =
+      window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    if (reduceMotion || !("IntersectionObserver" in window)) {
+      elements.forEach((el) => {
+        if (el) el.classList.add("is-visible");
+      });
+      return;
+    }
+
+    if (!scrollRevealObserver) {
+      scrollRevealObserver = new IntersectionObserver(
+        (entries, obs) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              obs.unobserve(entry.target);
+            }
+          });
+        },
+        {
+          root: null,
+          rootMargin: "0px 0px -8% 0px",
+          threshold: 0.12
+        }
+      );
+    }
+
+    elements.forEach((el) => {
+      if (!el) return;
+      el.classList.add("reveal-on-scroll");
+      scrollRevealObserver.observe(el);
+    });
+  }
+
+  function initScrollReveal() {
+    const heroGroups = [
+      { el: document.querySelector(".hero-character-col"), delay: 0 },
+      { el: document.querySelector(".hero-center-col"), delay: 90 },
+      { el: document.querySelector(".hero-mascot-col"), delay: 180 }
+    ];
+
+    heroGroups.forEach(({ el, delay }) => {
+      if (!el) return;
+      el.style.setProperty("--reveal-delay", delay + "ms");
+      observeRevealElements([el]);
+    });
+
+    const trustPlaque = document.querySelector(".trust-plaque-section");
+    if (trustPlaque) {
+      observeRevealElements([trustPlaque]);
+    }
+
+    const trustCols = Array.from(document.querySelectorAll(".trust-col"));
+    trustCols.forEach((col, idx) => {
+      col.style.setProperty("--reveal-delay", idx * 80 + "ms");
+    });
+    observeRevealElements(trustCols);
+
+    const showcaseTargets = [
+      document.querySelector(".contact-ornate-plaque"),
+      document.querySelector(".featured-accounts-area"),
+      document.querySelector(".footer")
+    ].filter(Boolean);
+
+    showcaseTargets.forEach((el, idx) => {
+      el.style.setProperty("--reveal-delay", idx * 70 + "ms");
+    });
+    observeRevealElements(showcaseTargets);
+  }
+
+  initScrollReveal();
+
+  // Back to Top floating button (appears after scrolling past the hero section)
+  function initBackToTopButton() {
+    const btn = document.getElementById("backToTopBtn");
+    if (!btn) return;
+
+    const heroSection =
+      document.getElementById("home") || document.querySelector(".hero-cathedral-stage");
+
+    const updateVisibility = () => {
+      if (heroSection) {
+        const rect = heroSection.getBoundingClientRect();
+        btn.classList.toggle("is-visible", rect.bottom <= 90);
+      } else {
+        btn.classList.toggle("is-visible", window.scrollY > 360);
+      }
+    };
+
+    if (heroSection && "IntersectionObserver" in window) {
+      const heroObserver = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            btn.classList.toggle(
+              "is-visible",
+              !entry.isIntersecting && entry.boundingClientRect.top < 0
+            );
+          });
+        },
+        { root: null, rootMargin: "-80px 0px 0px 0px", threshold: 0 }
+      );
+      heroObserver.observe(heroSection);
+    }
+
+    window.addEventListener("scroll", updateVisibility, { passive: true });
+    updateVisibility();
+
+    btn.addEventListener("click", () => {
+      const reduceMotion =
+        window.matchMedia && window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+      window.scrollTo({
+        top: 0,
+        behavior: reduceMotion ? "auto" : "smooth"
+      });
+    });
+  }
+
+  initBackToTopButton();
+
+  // Custom Creamy Gothic Cursor Follower & Sparkle/Heart Trail
+  function initCreamyGothicCursor() {
+    if (
+      !window.matchMedia ||
+      window.matchMedia("(hover: none), (pointer: coarse)").matches ||
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+
+    const layer = document.createElement("div");
+    layer.className = "gothic-cursor-layer";
+    layer.setAttribute("aria-hidden", "true");
+
+    const follower = document.createElement("div");
+    follower.className = "gothic-cursor-follower";
+    follower.innerHTML = '<div class="gothic-cursor-emblem">♡</div>';
+    layer.appendChild(follower);
+
+    const SYMBOLS = ["✦", "♡", "✧", "❦"];
+    const POOL_SIZE = 14;
+    const pool = [];
+
+    for (let i = 0; i < POOL_SIZE; i++) {
+      const el = document.createElement("span");
+      el.className = "gothic-cursor-particle";
+      el.textContent = SYMBOLS[i % SYMBOLS.length];
+      layer.appendChild(el);
+      pool.push({
+        el,
+        active: false,
+        x: 0,
+        y: 0,
+        vx: 0,
+        vy: 0,
+        life: 0,
+        maxLife: 0.65,
+        scale: 1,
+        rot: 0
+      });
+    }
+
+    document.body.appendChild(layer);
+
+    let targetX = -100;
+    let targetY = -100;
+    let curX = -100;
+    let curY = -100;
+    let lastSpawnX = -100;
+    let lastSpawnY = -100;
+    let hasMoved = false;
+    let poolIdx = 0;
+
+    function spawnParticle(x, y, burst) {
+      const p = pool[poolIdx];
+      poolIdx = (poolIdx + 1) % POOL_SIZE;
+      p.active = true;
+      p.x = x + (Math.random() - 0.5) * (burst ? 16 : 10);
+      p.y = y + (Math.random() - 0.5) * (burst ? 16 : 10);
+      p.vx = (Math.random() - 0.5) * (burst ? 42 : 18);
+      p.vy = -14 - Math.random() * (burst ? 28 : 16);
+      p.life = 0;
+      p.maxLife = 0.52 + Math.random() * 0.28;
+      p.scale = burst ? 0.95 + Math.random() * 0.35 : 0.75 + Math.random() * 0.3;
+      p.rot = (Math.random() - 0.5) * 35;
+      p.el.textContent = SYMBOLS[Math.floor(Math.random() * SYMBOLS.length)];
+    }
+
+    window.addEventListener(
+      "pointermove",
+      (e) => {
+        targetX = e.clientX;
+        targetY = e.clientY;
+        if (!hasMoved) {
+          hasMoved = true;
+          curX = targetX;
+          curY = targetY;
+          follower.classList.add("is-active");
+        }
+
+        const dx = targetX - lastSpawnX;
+        const dy = targetY - lastSpawnY;
+        if (dx * dx + dy * dy > 520) {
+          lastSpawnX = targetX;
+          lastSpawnY = targetY;
+          spawnParticle(targetX, targetY, false);
+        }
+
+        const interactive =
+          e.target &&
+          e.target.closest &&
+          e.target.closest(
+            "a, button, [role='button'], .portrait-card, .card, .winged-profile-frame"
+          );
+        follower.classList.toggle("is-hovering", Boolean(interactive));
+      },
+      { passive: true }
+    );
+
+    window.addEventListener(
+      "pointerdown",
+      (e) => {
+        follower.classList.add("is-pressing");
+        for (let i = 0; i < 3; i++) {
+          spawnParticle(e.clientX, e.clientY, true);
+        }
+      },
+      { passive: true }
+    );
+
+    window.addEventListener(
+      "pointerup",
+      () => {
+        follower.classList.remove("is-pressing");
+      },
+      { passive: true }
+    );
+
+    document.addEventListener("mouseleave", () => {
+      follower.classList.remove("is-active");
+      hasMoved = false;
+    });
+
+    let prevNow = performance.now();
+    function tick(now) {
+      const dt = Math.min(0.05, Math.max(0.001, (now - prevNow) * 0.001));
+      prevNow = now;
+
+      if (hasMoved) {
+        const lerp = Math.min(1, dt * 16);
+        curX += (targetX - curX) * lerp;
+        curY += (targetY - curY) * lerp;
+        follower.style.transform =
+          "translate3d(" + (curX + 10).toFixed(1) + "px, " + (curY + 10).toFixed(1) + "px, 0)";
+      }
+
+      for (let i = 0; i < POOL_SIZE; i++) {
+        const p = pool[i];
+        if (!p.active) continue;
+        p.life += dt;
+        if (p.life >= p.maxLife) {
+          p.active = false;
+          p.el.style.opacity = "0";
+          continue;
+        }
+        const progress = p.life / p.maxLife;
+        p.x += p.vx * dt;
+        p.y += p.vy * dt;
+        const alpha = progress < 0.2 ? progress / 0.2 : 1 - (progress - 0.2) / 0.8;
+        const sc = p.scale * (1 - progress * 0.35);
+        p.el.style.opacity = Math.max(0, alpha * 0.88).toFixed(2);
+        p.el.style.transform =
+          "translate3d(" +
+          p.x.toFixed(1) +
+          "px, " +
+          p.y.toFixed(1) +
+          "px, 0) scale(" +
+          sc.toFixed(2) +
+          ") rotate(" +
+          (p.rot + progress * 24).toFixed(1) +
+          "deg)";
+      }
+
+      requestAnimationFrame(tick);
+    }
+
+    requestAnimationFrame(tick);
+  }
+
+  initCreamyGothicCursor();
 
   // Smooth anchor scrolling
   document.addEventListener("click", (event) => {
@@ -208,8 +499,20 @@
   let cardFallbacks = [...DEFAULT_CARDS];
 
   function renderCarousel() {
+    const featuredArea = document.getElementById("accounts");
+    const showcaseGrid = document.querySelector(".lower-showcase-grid");
     const grid = document.getElementById("homeAccountGrid");
-    if (!grid || !allAccounts.length) return;
+    if (!grid) return;
+
+    if (!Array.isArray(allAccounts) || allAccounts.length === 0) {
+      grid.innerHTML = "";
+      if (featuredArea) featuredArea.hidden = true;
+      if (showcaseGrid) showcaseGrid.classList.add("single-col-contact");
+      return;
+    }
+
+    if (featuredArea) featuredArea.hidden = false;
+    if (showcaseGrid) showcaseGrid.classList.remove("single-col-contact");
 
     const visible = [];
     const count = Math.min(3, allAccounts.length);
@@ -219,7 +522,7 @@
     }
 
     grid.innerHTML = visible
-      .map(({ item, idx }) => {
+      .map(({ item, idx }, cardPos) => {
         const fallbackImg = cardFallbacks[idx % cardFallbacks.length] || DEFAULT_CARDS[0];
         const imgSrc = item.image_url ? esc(item.image_url) : fallbackImg;
         const catText = catLabel[item.category] || "ไอดีปกติ";
@@ -230,7 +533,9 @@
           "ไอดีคัดพิเศษ ตรวจสอบความปลอดภัยเรียบร้อย พร้อมส่งมอบทันที";
 
         return (
-          '<article class="portrait-card">' +
+          '<article class="portrait-card reveal-on-scroll" style="--reveal-delay:' +
+          cardPos * 85 +
+          'ms">' +
           '<span class="card-crown-badge" aria-hidden="true">♛</span>' +
           '<div class="portrait-frame">' +
           '<img src="' +
@@ -263,6 +568,8 @@
         );
       })
       .join("");
+
+    observeRevealElements(Array.from(grid.querySelectorAll(".portrait-card")));
   }
 
   const prevBtn = document.getElementById("carouselPrevBtn");
@@ -350,18 +657,12 @@
         primaryContactBtn.href = lineUrl;
       }
     }
-
-    if (Array.isArray(settings.featured_accounts) && settings.featured_accounts.length > 0) {
-      const available = settings.featured_accounts.filter(
-        (x) => x.status !== "sold"
-      );
-      allAccounts = available.length ? available : settings.featured_accounts;
-      renderCarousel();
-    }
   }
 
   // Load settings from backend API + Supabase
   (async () => {
+    renderCarousel();
+
     let serverSettings = null;
     try {
       const res = await fetch("/api/site-settings");
@@ -373,9 +674,23 @@
       // Ignore network error
     }
 
-    // Also check Supabase if configured
     const cfg = window.SHOP_CONFIG || {};
-    if (!window.supabase || !cfg.supabaseUrl || !cfg.supabaseAnonKey) return;
+    const hasSupabase =
+      window.supabase &&
+      cfg.supabaseUrl &&
+      cfg.supabaseAnonKey &&
+      !cfg.supabaseUrl.includes("YOUR-PROJECT");
+
+    if (!hasSupabase) {
+      if (serverSettings && Array.isArray(serverSettings.featured_accounts)) {
+        allAccounts = serverSettings.featured_accounts.filter((x) => x.status !== "sold");
+      } else {
+        allAccounts = [];
+      }
+      renderCarousel();
+      return;
+    }
+
     const db = window.supabase.createClient(cfg.supabaseUrl, cfg.supabaseAnonKey);
 
     try {
@@ -386,12 +701,15 @@
         .order("created_at", { ascending: false })
         .limit(12);
 
-      if (!accountsErr && Array.isArray(accountsData) && accountsData.length > 0) {
+      if (!accountsErr && Array.isArray(accountsData)) {
         allAccounts = accountsData;
-        renderCarousel();
+      } else {
+        allAccounts = [];
       }
+      renderCarousel();
     } catch (_e) {
-      // Keep server accounts
+      allAccounts = [];
+      renderCarousel();
     }
 
     try {
