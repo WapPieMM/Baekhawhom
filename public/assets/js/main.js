@@ -409,6 +409,9 @@
         if (shopData.instagram_text) merged.instagram_text = shopData.instagram_text;
         if (shopData.facebook_url) merged.facebook_url = shopData.facebook_url;
         if (shopData.facebook_text) merged.facebook_text = shopData.facebook_text;
+        ["hero_girl_url", "hero_bunny_url", "hero_bg_url", "shop_name", "shop_subtitle", "shop_quote", "shop_status"].forEach((key) => {
+          if (shopData[key]) merged[key] = shopData[key];
+        });
         applyThemeSettings(merged);
       }
     } catch (_e) {
