@@ -43,20 +43,26 @@
   }
 
   async function uploadImageFile(file, prefix = "upload") {
-    if (file.size > 10 * 1024 * 1024) {
-      throw new Error("รูปภาพต้องมีขนาดไม่เกิน 10 MB");
+    if (!db || !isSupabaseAdmin) {
+      throw new Error("กรุณาเข้าสู่ระบบด้วยบัญชี Admin ก่อนอัปโหลดรูป");
     }
-    const dataUrl = await readFileAsDataUrl(file);
-    const res = await fetch("/api/upload-image", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ dataUrl, prefix })
+    if (!file || !/^image\\/(jpeg|png|webp)$/.test(file.type)) {
+      throw new Error("รองรับเฉพาะไฟล์ JPG, PNG หรือ WebP");
+    }
+    if (file.size > 5 * 1024 * 1024) {
+      throw new Error("รูปภาพต้องมีขนาดไม่เกิน 5 MB");
+    }
+    const safeName = String(file.name || "image").replace(/[^a-zA-Z0-9._-]/g, "_");
+    const path = prefix + "/" + Date.now() + "-" + crypto.randomUUID() + "-" + safeName;
+    const { data, error } = await db.storage.from("account-images").upload(path, file, {
+      cacheControl: "3600",
+      contentType: file.type,
+      upsert: false
     });
-    const json = await res.json();
-    if (!res.ok || !json.url) {
-      throw new Error(json.error || "อัปโหลดรูปไม่สำเร็จ");
-    }
-    return json.url;
+    if (error) throw new Error("อัปโหลดรูปไม่สำเร็จ: " + error.message);
+    const { data: publicData } = db.storage.from("account-images").getPublicUrl(data.path);
+    if (!publicData?.publicUrl) throw new Error("สร้าง URL รูปภาพไม่สำเร็จ");
+    return publicData.publicUrl;
   }
 
   function showAdmin() {
@@ -212,22 +218,24 @@
       // Ignore
     }
 
-    if (db && isSupabaseAdmin) {
+    if (db) {
       try {
-        const { data } = await db
-          .from("shop_settings")
-          .select("*")
-          .eq("id", "main")
-          .maybeSingle();
-        if (data && contactForm) {
-          ["line_url", "line_text", "instagram_url", "instagram_text", "facebook_url", "facebook_text"].forEach((k) => {
-            if (data[k] && contactForm.elements[k]) {
-              contactForm.elements[k].value = data[k];
-            }
+        const { data, error } = await db.from("shop_settings").select("*").eq("id", "main").maybeSingle();
+        if (error) throw error;
+        if (data) {
+          const contactKeys = ["line_url", "line_text", "instagram_url", "instagram_text", "facebook_url", "facebook_text"];
+          contactKeys.forEach((k) => {
+            if (contactForm?.elements[k]) contactForm.elements[k].value = data[k] ?? "";
           });
+          ["hero_girl_url", "hero_bunny_url", "hero_bg_url", "shop_name", "shop_subtitle", "shop_quote", "shop_status"].forEach((k) => {
+            if (themeForm?.elements[k] && data[k] != null) themeForm.elements[k].value = data[k];
+          });
+          if (data.hero_girl_url) $("previewHeroGirl").src = data.hero_girl_url;
+          if (data.hero_bunny_url) $("previewHeroBunny").src = data.hero_bunny_url;
+          if (data.hero_bg_url) $("previewHeroBg").src = data.hero_bg_url;
         }
-      } catch (_e) {
-        // Ignore
+      } catch (err) {
+        message("themeMessage", "โหลดค่าจาก Supabase ไม่สำเร็จ: " + err.message, true);
       }
     }
   }
@@ -248,12 +256,13 @@
       };
 
       try {
-        const res = await fetch("/api/site-settings", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(payload)
+        if (!db || !isSupabaseAdmin) throw new Error("กรุณาเข้าสู่ระบบด้วยบัญชี Admin ก่อนบันทึก");
+        const { error } = await db.from("shop_settings").upsert({
+          id: "main",
+          ...payload,
+          updated_at: new Date().toISOString()
         });
-        if (!res.ok) throw new Error("บันทึกไม่สำเร็จ");
+        if (error) throw error;
         message("themeMessage", "บันทึกรูปภาพและข้อความหน้าแรกเรียบร้อยแล้ว ♡");
       } catch (err) {
         message("themeMessage", err.message || "เกิดข้อผิดพลาด", true);
@@ -318,22 +327,11 @@
     }
 
     try {
-      const endpoint = id ? `/api/accounts/${encodeURIComponent(id)}` : "/api/accounts";
-      const method = id ? "PUT" : "POST";
-      const res = await fetch(endpoint, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
-      });
-      if (!res.ok) throw new Error("บันทึกไอดีไม่สำเร็จ");
-
-      if (db && isSupabaseAdmin) {
-        if (id) {
-          await db.from("accounts").update(payload).eq("id", id);
-        } else {
-          await db.from("accounts").insert(payload);
-        }
-      }
+      if (!db || !isSupabaseAdmin) throw new Error("กรุณาเข้าสู่ระบบด้วยบัญชี Admin ก่อนบันทึก");
+      const result = id
+        ? await db.from("accounts").update(payload).eq("id", id)
+        : await db.from("accounts").insert(payload);
+      if (result.error) throw result.error;
 
       message("formMessage", "บันทึกรายการไอดีเรียบร้อย ♡");
       resetAccountForm();
@@ -444,10 +442,9 @@
       pendingDeleteId = null;
       const x = rows.find((a) => String(a.id) === targetId);
       if (!x) return;
-      await fetch(`/api/accounts/${encodeURIComponent(x.id)}`, { method: "DELETE" });
-      if (db && isSupabaseAdmin) {
-        await db.from("accounts").delete().eq("id", x.id);
-      }
+      if (!db || !isSupabaseAdmin) return message("formMessage", "กรุณาเข้าสู่ระบบด้วยบัญชี Admin", true);
+      const { error } = await db.from("accounts").delete().eq("id", x.id);
+      if (error) return message("formMessage", error.message, true);
       resetAccountForm();
       await loadAccounts();
     }
@@ -471,20 +468,13 @@
     };
 
     try {
-      const res = await fetch("/api/site-settings", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload)
+      if (!db || !isSupabaseAdmin) throw new Error("กรุณาเข้าสู่ระบบด้วยบัญชี Admin ก่อนบันทึก");
+      const { error } = await db.from("shop_settings").upsert({
+        id: "main",
+        ...payload,
+        updated_at: new Date().toISOString()
       });
-      if (!res.ok) throw new Error("บันทึกไม่สำเร็จ");
-
-      if (db && isSupabaseAdmin) {
-        await db.from("shop_settings").upsert({
-          id: "main",
-          ...payload,
-          updated_at: new Date().toISOString()
-        });
-      }
+      if (error) throw error;
       message("contactMessage", "บันทึกช่องทางติดต่อเรียบร้อยแล้ว ♡");
     } catch (err) {
       message("contactMessage", err.message || "เกิดข้อผิดพลาด", true);
