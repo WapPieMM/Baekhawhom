@@ -1,0 +1,13 @@
+(() => {
+const cfg=window.SHOP_CONFIG||{},$=id=>document.getElementById(id);
+const configured=window.supabase&&cfg.supabaseUrl&&cfg.supabaseAnonKey&&!cfg.supabaseUrl.includes('YOUR-PROJECT');
+const db=configured?window.supabase.createClient(cfg.supabaseUrl,cfg.supabaseAnonKey):null;
+let rows=[],category='all',status='available';
+const catName={chicken_skin:'ไอดีไก่สกิน',normal:'ไอดีปกติ'};
+const esc=s=>String(s??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+function render(){const matches=rows.filter(x=>(category==='all'||x.category===category)&&x.status===status);$('availableCount').textContent=rows.filter(x=>(category==='all'||x.category===category)&&x.status==='available').length;$('soldCount').textContent=rows.filter(x=>(category==='all'||x.category===category)&&x.status==='sold').length;$('resultCount').textContent=matches.length+' รายการ · '+(status==='available'?'พร้อมขาย':'ขายแล้ว');$('accountGrid').innerHTML=matches.length?matches.map(x=>'<article class="card">'+(x.image_url?'<img src="'+esc(x.image_url)+'" alt="'+esc(x.title)+'" loading="lazy">':'<div class="placeholder">♡</div>')+'<div class="body"><span class="category">'+(catName[x.category]||'ไอดี')+'</span><h2>'+esc(x.title)+'</h2><p class="description">'+esc(x.description||'')+'</p><div class="bottom"><strong class="price">฿ '+Number(x.price||0).toLocaleString('th-TH')+'</strong><span class="state '+(status==='sold'?'sold':'')+'">'+(status==='sold'?'ขายแล้ว':'พร้อมขาย')+'</span></div></div></article>').join(''):'<p class="empty">ยังไม่มีรายการในหมวดนี้ค่ะ ♡</p>'}
+document.querySelectorAll('[data-category]').forEach(b=>b.addEventListener('click',()=>{category=b.dataset.category;document.querySelectorAll('[data-category]').forEach(x=>x.classList.toggle('active',x===b));render()}));
+document.querySelectorAll('[data-status]').forEach(b=>b.addEventListener('click',()=>{status=b.dataset.status;document.querySelectorAll('[data-status]').forEach(x=>x.classList.toggle('active',x===b));render()}));
+async function init(){if(!db){$('accountGrid').innerHTML='<p class="empty">ยังไม่ได้ตั้งค่าฐานข้อมูล กรุณาตั้งค่า Supabase ก่อนใช้งาน</p>';return}const {data,error}=await db.from('accounts').select('id,title,category,status,price,description,image_url,created_at').order('created_at',{ascending:false});if(error){$('accountGrid').innerHTML='<p class="empty">โหลดรายการไม่สำเร็จ: '+esc(error.message)+'</p>';return}rows=data||[];render()}
+document.addEventListener('DOMContentLoaded',init);
+})();
