@@ -119,10 +119,12 @@
       password: fd.get("password")
     });
     if (error) return message("loginMessage", error.message, true);
-    if (data.user?.app_metadata?.role === "admin") {
-      isSupabaseAdmin = true;
+    if (data.user?.app_metadata?.role !== "admin") {
+      await db.auth.signOut();
+      return message("loginMessage", "บัญชีนี้ยังไม่ได้รับสิทธิ์ Admin", true);
     }
-    sessionStorage.setItem("bkh_quick_admin", "1");
+    isSupabaseAdmin = true;
+    sessionStorage.removeItem("bkh_quick_admin");
     showAdmin();
   });
 
@@ -147,6 +149,7 @@
         const uploadedUrl = await uploadImageFile(file, prefix);
         urlInput.value = uploadedUrl;
         previewImg.src = uploadedUrl;
+        fileInput.value = "";
         message("themeMessage", "อัปโหลดรูปเรียบร้อย กดปุ่ม 'บันทึกการตั้งค่าหน้าแรก' เพื่อใช้งาน");
       } catch (err) {
         message("themeMessage", err.message || "อัปโหลดไม่สำเร็จ", true);
@@ -178,6 +181,7 @@
         const url = await uploadImageFile(file, "card");
         accountImageUrlInput.value = url;
         accountFormPreview.src = url;
+        accountImageFile.value = "";
         message("formMessage", "อัปโหลดรูปการ์ดเรียบร้อย");
       } catch (err) {
         message("formMessage", err.message || "อัปโหลดรูปไม่สำเร็จ", true);
@@ -352,16 +356,15 @@
     }
 
     if (db && isSupabaseAdmin) {
-      try {
-        const { data, error } = await db
-          .from("accounts")
-          .select("id,title,category,status,price,image_url,description,created_at")
-          .order("created_at", { ascending: false });
-        if (!error && Array.isArray(data) && data.length > 0) {
-          rows = data;
-        }
-      } catch (_e) {
-        // Keep server rows
+      const { data, error } = await db
+        .from("accounts")
+        .select("id,title,category,status,price,image_url,description,created_at")
+        .order("created_at", { ascending: false });
+      if (error) {
+        message("formMessage", "โหลดรายการจาก Supabase ไม่สำเร็จ: " + error.message, true);
+        rows = [];
+      } else {
+        rows = Array.isArray(data) ? data : [];
       }
     }
 
