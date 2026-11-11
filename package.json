@@ -1,0 +1,1 @@
+{"name":"aspo-id-shop","version":"1.0.0","private":true,"type":"module","scripts":{"dev":"node server.js","start":"node server.js","build":"node --check server.js && node --check public/assets/js/admin-accounts.js && node --check public/assets/js/accounts.js"},"dependencies":{"express":"^4.21.2"}}
