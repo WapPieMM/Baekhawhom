@@ -549,6 +549,244 @@
 
   initCreamyGothicCursor();
 
+  // Ambient Floating Gothic Rose Petals & Shimmering Silver/Gold Dust (60fps Canvas)
+  function initGothicAmbientParticles() {
+    if (
+      window.matchMedia &&
+      window.matchMedia("(prefers-reduced-motion: reduce)").matches
+    ) {
+      return;
+    }
+
+    const canvas = document.createElement("canvas");
+    canvas.className = "gothic-ambient-canvas";
+    canvas.setAttribute("aria-hidden", "true");
+    document.body.appendChild(canvas);
+
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    let width = 0;
+    let height = 0;
+    let dpr = 1;
+
+    function resize() {
+      width = window.innerWidth || document.documentElement.clientWidth || 1280;
+      height = window.innerHeight || document.documentElement.clientHeight || 800;
+      dpr = Math.min(window.devicePixelRatio || 1, 2);
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    }
+
+    resize();
+    window.addEventListener("resize", resize, { passive: true });
+
+    const PARTICLE_COUNT = 32;
+    const particles = [];
+
+    function createParticle(initialRandomY) {
+      const rand = Math.random();
+      const kind = rand < 0.48 ? "petal" : rand < 0.78 ? "dust" : "star";
+      const isDarkPetal = kind === "petal" && Math.random() < 0.42;
+      const depth = 0.45 + Math.random() * 0.65;
+
+      return {
+        kind,
+        isDarkPetal,
+        depth,
+        x: Math.random() * width,
+        y: initialRandomY ? Math.random() * height : -24 - Math.random() * 80,
+        vx: (Math.random() - 0.35) * 11 * depth,
+        vy: (kind === "dust" ? 8 + Math.random() * 12 : 13 + Math.random() * 18) * depth,
+        size:
+          kind === "petal"
+            ? (5.2 + Math.random() * 4.8) * depth
+            : kind === "star"
+              ? (3.6 + Math.random() * 3.2) * depth
+              : (1.5 + Math.random() * 2.2) * depth,
+        rot: Math.random() * Math.PI * 2,
+        rotSpeed: (Math.random() - 0.5) * 1.35,
+        flip: Math.random() * Math.PI * 2,
+        flipSpeed: 0.9 + Math.random() * 1.6,
+        swayPhase: Math.random() * Math.PI * 2,
+        swaySpeed: 0.7 + Math.random() * 1.1,
+        swayAmp: (8 + Math.random() * 16) * depth,
+        twinklePhase: Math.random() * Math.PI * 2,
+        twinkleSpeed: 1.8 + Math.random() * 2.6,
+        baseAlpha:
+          kind === "petal"
+            ? isDarkPetal
+              ? 0.28 + Math.random() * 0.24
+              : 0.58 + Math.random() * 0.28
+            : 0.36 + Math.random() * 0.42
+      };
+    }
+
+    for (let i = 0; i < PARTICLE_COUNT; i++) {
+      particles.push(createParticle(true));
+    }
+
+    let pointerX = -9999;
+    let pointerY = -9999;
+    let pointerVx = 0;
+    let pointerVy = 0;
+    let lastPointerX = -9999;
+    let lastPointerY = -9999;
+
+    window.addEventListener(
+      "pointermove",
+      (e) => {
+        if (lastPointerX > -9000) {
+          pointerVx = (e.clientX - lastPointerX) * 0.35;
+          pointerVy = (e.clientY - lastPointerY) * 0.35;
+        }
+        lastPointerX = e.clientX;
+        lastPointerY = e.clientY;
+        pointerX = e.clientX;
+        pointerY = e.clientY;
+      },
+      { passive: true }
+    );
+
+    function drawPetal(p, alpha) {
+      const flipScale = 0.28 + Math.abs(Math.cos(p.flip)) * 0.72;
+      const s = p.size;
+
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot);
+      ctx.scale(1, flipScale);
+      ctx.globalAlpha = alpha;
+
+      ctx.beginPath();
+      ctx.moveTo(0, -s);
+      ctx.bezierCurveTo(s * 0.95, -s * 0.85, s * 1.1, s * 0.35, 0, s);
+      ctx.bezierCurveTo(-s * 1.1, s * 0.35, -s * 0.95, -s * 0.85, 0, -s);
+      ctx.closePath();
+
+      if (p.isDarkPetal) {
+        const grad = ctx.createLinearGradient(-s, -s, s, s);
+        grad.addColorStop(0, "#3a3644");
+        grad.addColorStop(0.55, "#1f1d26");
+        grad.addColorStop(1, "#121017");
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.lineWidth = 0.6;
+        ctx.strokeStyle = "rgba(195, 192, 212, 0.42)";
+        ctx.stroke();
+      } else {
+        const grad = ctx.createLinearGradient(-s, -s, s, s);
+        grad.addColorStop(0, "#ffffff");
+        grad.addColorStop(0.65, "#f3f3f9");
+        grad.addColorStop(1, "#dfdfe9");
+        ctx.fillStyle = grad;
+        ctx.fill();
+        ctx.lineWidth = 0.75;
+        ctx.strokeStyle = "rgba(154, 152, 168, 0.52)";
+        ctx.stroke();
+      }
+
+      ctx.restore();
+    }
+
+    function drawStar(p, alpha) {
+      const s = p.size;
+      ctx.save();
+      ctx.translate(p.x, p.y);
+      ctx.rotate(p.rot * 0.4);
+      ctx.globalAlpha = alpha;
+
+      ctx.beginPath();
+      ctx.moveTo(0, -s);
+      ctx.quadraticCurveTo(0, 0, s, 0);
+      ctx.quadraticCurveTo(0, 0, 0, s);
+      ctx.quadraticCurveTo(0, 0, -s, 0);
+      ctx.quadraticCurveTo(0, 0, 0, -s);
+      ctx.closePath();
+
+      ctx.fillStyle = "#c9b38c";
+      ctx.shadowColor = "rgba(212, 190, 148, 0.65)";
+      ctx.shadowBlur = 6;
+      ctx.fill();
+      ctx.restore();
+    }
+
+    function drawDust(p, alpha) {
+      const r = p.size;
+      ctx.save();
+      ctx.globalAlpha = alpha;
+      const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 2.4);
+      grad.addColorStop(0, "rgba(218, 198, 158, 0.95)");
+      grad.addColorStop(0.5, "rgba(182, 178, 196, 0.5)");
+      grad.addColorStop(1, "rgba(182, 178, 196, 0)");
+      ctx.fillStyle = grad;
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, r * 2.4, 0, Math.PI * 2);
+      ctx.fill();
+      ctx.restore();
+    }
+
+    let prevTime = performance.now();
+
+    function step(now) {
+      const dt = Math.min(0.05, Math.max(0.001, (now - prevTime) * 0.001));
+      prevTime = now;
+
+      if (!document.hidden) {
+        ctx.clearRect(0, 0, width, height);
+        pointerVx *= 0.92;
+        pointerVy *= 0.92;
+
+        for (let i = 0; i < particles.length; i++) {
+          const p = particles[i];
+          p.swayPhase += p.swaySpeed * dt;
+          p.twinklePhase += p.twinkleSpeed * dt;
+          p.rot += p.rotSpeed * dt;
+          p.flip += p.flipSpeed * dt;
+
+          const breezeX = Math.sin(p.swayPhase) * p.swayAmp * dt;
+          p.x += p.vx * dt + breezeX;
+          p.y += p.vy * dt;
+
+          const dx = p.x - pointerX;
+          const dy = p.y - pointerY;
+          const distSq = dx * dx + dy * dy;
+          if (distSq < 13500 && distSq > 4) {
+            const dist = Math.sqrt(distSq);
+            const push = (1 - dist / 116) * 24 * dt * p.depth;
+            p.x += (dx / dist) * push + pointerVx * 0.08 * dt;
+            p.y += (dy / dist) * push + pointerVy * 0.08 * dt;
+          }
+
+          if (p.y > height + 32) {
+            particles[i] = createParticle(false);
+            continue;
+          }
+          if (p.x < -36) p.x = width + 30;
+          if (p.x > width + 36) p.x = -30;
+
+          const twinkle = 0.68 + 0.32 * Math.sin(p.twinklePhase);
+          const alpha = Math.max(0.08, Math.min(0.95, p.baseAlpha * twinkle));
+
+          if (p.kind === "petal") {
+            drawPetal(p, alpha);
+          } else if (p.kind === "star") {
+            drawStar(p, alpha);
+          } else {
+            drawDust(p, alpha);
+          }
+        }
+      }
+
+      requestAnimationFrame(step);
+    }
+
+    requestAnimationFrame(step);
+  }
+
+  initGothicAmbientParticles();
+
   // Smooth anchor scrolling
   document.addEventListener("click", (event) => {
     const link = event.target.closest('a[href^="#"]');

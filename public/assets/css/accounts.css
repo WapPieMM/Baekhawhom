@@ -1,14 +1,14 @@
 :root {
-  --cream: #f5f0e9;
-  --paper: #fffdf9;
-  --beige: #e8ded2;
-  --taupe: #b7a79a;
-  --line: #d5c7bb;
-  --brown: #796b63;
-  --ink: #51443e;
-  --muted: #8a796d;
-  --shadow-soft: 0 12px 30px rgba(81, 68, 62, 0.08);
-  --shadow-elevated: 0 18px 40px rgba(81, 68, 62, 0.13);
+  --cream: #ffffff;
+  --paper: #ffffff;
+  --beige: #f4f4f8;
+  --taupe: #a7a6b2;
+  --line: #dfdfe6;
+  --brown: #565460;
+  --ink: #26242b;
+  --muted: #6e6c78;
+  --shadow-soft: 0 12px 30px rgba(30, 28, 38, 0.06);
+  --shadow-elevated: 0 18px 40px rgba(30, 28, 38, 0.11);
   --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
 }
 
@@ -18,7 +18,7 @@
 
 body {
   margin: 0;
-  background: #e9e1d8;
+  background: #f4f4f7;
   color: var(--ink);
   font-family: "Prompt", sans-serif;
   font-weight: 300;
@@ -30,7 +30,7 @@ body {
   margin: 0 auto;
   min-height: 100vh;
   background: var(--cream);
-  border-inline: 1px solid #ded2c7;
+  border-inline: 1px solid #e2e2ea;
   display: flex;
   flex-direction: column;
 }
@@ -69,7 +69,7 @@ main {
   align-items: center;
   gap: 32px;
   border-bottom: 1px solid var(--line);
-  background: rgba(255, 253, 249, 0.94);
+  background: rgba(255, 255, 255, 0.95);
   position: sticky;
   top: 0;
   z-index: 20;
@@ -131,7 +131,7 @@ nav a[aria-current="page"] {
 
 .intro {
   padding: 0 clamp(20px, 5vw, 72px) 34px;
-  background: radial-gradient(ellipse at 30% 20%, #fffdf9, #ece3d9);
+  background: radial-gradient(ellipse at 30% 20%, #ffffff, #f3f3f8);
   border-bottom: 1px solid var(--line);
   overflow: hidden;
 }
@@ -264,7 +264,7 @@ nav a[aria-current="page"] {
   object-fit: cover;
   object-position: center 22%;
   display: block;
-  filter: sepia(8%) contrast(103%);
+  filter: contrast(103%);
 }
 
 .winged-frame-overlay {
@@ -371,8 +371,8 @@ nav a[aria-current="page"] {
   aspect-ratio: 16 / 9;
   border-radius: 11px;
   overflow: hidden;
-  background: linear-gradient(140deg, #d6c7b9, #8e7c70);
-  border: 1px solid rgba(183, 167, 154, 0.5);
+  background: linear-gradient(140deg, #eeeef4, #c6c6d4);
+  border: 1px solid rgba(196, 196, 208, 0.6);
 }
 
 .card-media img {
@@ -380,7 +380,7 @@ nav a[aria-current="page"] {
   height: 100%;
   object-fit: cover;
   display: block;
-  filter: sepia(10%) contrast(102%);
+  filter: contrast(102%);
   transition: transform 300ms var(--ease-out);
 }
 
@@ -483,7 +483,7 @@ footer {
   text-align: center;
   padding: 32px 20px;
   color: var(--brown);
-  background: #eee6dd;
+  background: #f5f5f9;
   border-top: 1px solid var(--line);
 }
 
@@ -522,7 +522,7 @@ footer {
   transform: translateY(-1px) scale(1.06);
   text-decoration: underline;
   text-underline-offset: 4px;
-  text-shadow: 0 2px 8px rgba(81, 68, 62, 0.14);
+  text-shadow: 0 2px 8px rgba(32, 30, 42, 0.12);
 }
 
 footer p {
@@ -577,13 +577,13 @@ footer p {
   width: 48px;
   height: 48px;
   border-radius: 50%;
-  border: 1.5px solid #cab8a7;
-  background: linear-gradient(180deg, #fffdf9 0%, #ede3d7 100%);
+  border: 1.5px solid #c5c5d2;
+  background: linear-gradient(180deg, #ffffff 0%, #f1f1f6 100%);
   color: var(--ink);
   box-shadow:
-    0 10px 24px rgba(81, 68, 62, 0.16),
-    inset 0 0 0 3px rgba(255, 253, 249, 0.8),
-    inset 0 0 0 4px rgba(196, 179, 163, 0.45);
+    0 10px 24px rgba(32, 30, 42, 0.14),
+    inset 0 0 0 3px rgba(255, 255, 255, 0.92),
+    inset 0 0 0 4px rgba(196, 196, 208, 0.5);
   display: inline-flex;
   flex-direction: column;
   align-items: center;
@@ -613,12 +613,12 @@ footer p {
 
 .back-to-top-btn:hover {
   transform: translate3d(0, -3px, 0) scale(1.04);
-  border-color: #b09b88;
-  background: linear-gradient(180deg, #ffffff 0%, #e5d8c9 100%);
+  border-color: #a8a8b8;
+  background: linear-gradient(180deg, #ffffff 0%, #e9e9f0 100%);
   box-shadow:
-    0 14px 28px rgba(81, 68, 62, 0.22),
-    inset 0 0 0 3px rgba(255, 253, 249, 0.9),
-    inset 0 0 0 4px rgba(176, 155, 136, 0.6);
+    0 14px 28px rgba(32, 30, 42, 0.2),
+    inset 0 0 0 3px rgba(255, 255, 255, 0.98),
+    inset 0 0 0 4px rgba(176, 176, 190, 0.65);
 }
 
 .back-to-top-btn:active {
@@ -628,7 +628,7 @@ footer p {
 .back-to-top-sparkle {
   font-size: 8px;
   line-height: 1;
-  color: #a48e7b;
+  color: #888696;
   margin-bottom: -2px;
 }
 
@@ -658,7 +658,7 @@ footer p {
   opacity: 0;
   will-change: transform, opacity;
   transition: opacity 220ms var(--ease-out);
-  filter: drop-shadow(0 3px 8px rgba(81, 68, 62, 0.22));
+  filter: drop-shadow(0 3px 8px rgba(32, 30, 42, 0.2));
 }
 
 .gothic-cursor-follower.is-active {
@@ -672,9 +672,9 @@ footer p {
   align-items: center;
   justify-content: center;
   border-radius: 50%;
-  background: radial-gradient(circle, rgba(255, 253, 249, 0.92) 0%, rgba(238, 228, 216, 0.55) 68%, rgba(238, 228, 216, 0) 100%);
-  border: 1px solid rgba(186, 168, 152, 0.72);
-  color: #6b584c;
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.96) 0%, rgba(240, 240, 246, 0.65) 68%, rgba(240, 240, 246, 0) 100%);
+  border: 1px solid rgba(182, 182, 196, 0.8);
+  color: #383642;
   font-size: 13px;
   line-height: 1;
   transition:
@@ -690,15 +690,15 @@ footer p {
   top: -4px;
   right: -3px;
   font-size: 9px;
-  color: #a68f7c;
+  color: #8f8d9e;
   transition: transform 260ms var(--ease-out);
 }
 
 .gothic-cursor-follower.is-hovering .gothic-cursor-emblem {
   transform: scale(1.32);
-  border-color: rgba(154, 132, 114, 0.95);
-  background: radial-gradient(circle, rgba(255, 253, 249, 0.96) 0%, rgba(233, 220, 205, 0.78) 72%, rgba(233, 220, 205, 0) 100%);
-  box-shadow: 0 0 14px rgba(196, 176, 158, 0.48);
+  border-color: rgba(140, 140, 156, 0.95);
+  background: radial-gradient(circle, rgba(255, 255, 255, 0.99) 0%, rgba(232, 232, 240, 0.82) 72%, rgba(232, 232, 240, 0) 100%);
+  box-shadow: 0 0 14px rgba(190, 190, 205, 0.52);
 }
 
 .gothic-cursor-follower.is-hovering .gothic-cursor-emblem::after {
@@ -717,8 +717,8 @@ footer p {
   user-select: none;
   font-size: 11px;
   line-height: 1;
-  color: #8f7a6b;
-  text-shadow: 0 1px 4px rgba(255, 253, 249, 0.9);
+  color: #6c6a7a;
+  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.95);
   opacity: 0;
   will-change: transform, opacity;
 }
@@ -729,7 +729,7 @@ footer p {
   }
 }
 
-/* Creamy Gothic 5-Branch Candelabra Loader */
+/* White Gothic 5-Branch Candelabra Loader */
 .candelabra-loader {
   position: fixed;
   inset: 0;
@@ -739,7 +739,7 @@ footer p {
   justify-content: center;
   padding: 24px;
   background:
-    radial-gradient(circle at 50% 36%, rgba(255, 252, 246, 0.98) 0%, rgba(242, 234, 224, 0.98) 52%, rgba(226, 215, 203, 0.99) 100%);
+    radial-gradient(circle at 50% 36%, rgba(255, 255, 255, 0.99) 0%, rgba(248, 248, 252, 0.99) 55%, rgba(238, 238, 244, 0.99) 100%);
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
   opacity: 1;
@@ -1109,7 +1109,7 @@ footer p {
   font-size: clamp(1.35rem, 3.2vw, 1.75rem);
   font-weight: 600;
   letter-spacing: 0.06em;
-  color: #3b312c;
+  color: #24222c;
   margin-bottom: 6px;
 }
 
@@ -1120,14 +1120,14 @@ footer p {
   justify-content: space-between;
   gap: 10px;
   font-size: 0.84rem;
-  color: #6b5b50;
+  color: #565462;
   margin-bottom: 8px;
 }
 
 .loader-progress-meta strong {
   font-family: "Cormorant Garamond", Georgia, serif;
   font-size: 0.92rem;
-  color: #3b312c;
+  color: #24222c;
   letter-spacing: 0.04em;
 }
 
@@ -1136,11 +1136,11 @@ footer p {
   width: min(310px, 82vw);
   height: 11px;
   border-radius: 999px;
-  background: rgba(44, 37, 35, 0.14);
-  border: 1px solid rgba(110, 94, 82, 0.52);
+  background: rgba(34, 32, 42, 0.12);
+  border: 1px solid rgba(120, 118, 134, 0.5);
   box-shadow:
-    inset 0 1px 3px rgba(38, 30, 26, 0.22),
-    0 2px 10px rgba(255, 253, 249, 0.85);
+    inset 0 1px 3px rgba(24, 22, 32, 0.18),
+    0 2px 10px rgba(255, 255, 255, 0.92);
   overflow: visible;
 }
 
@@ -1149,7 +1149,7 @@ footer p {
   height: 100%;
   width: 0%;
   border-radius: 999px;
-  background: linear-gradient(90deg, #2b2423 0%, #6e523e 45%, #d9933d 82%, #ffd782 100%);
+  background: linear-gradient(90deg, #24222b 0%, #5c5360 45%, #d9933d 82%, #ffd782 100%);
   box-shadow: 0 0 12px rgba(226, 152, 68, 0.72);
   transition: width 90ms linear;
 }
@@ -1178,8 +1178,8 @@ footer p {
   height: 7px;
   border-radius: 50%;
   transform: translate(-50%, -50%);
-  background: #2b2524;
-  border: 1px solid rgba(168, 146, 128, 0.75);
+  background: #24222b;
+  border: 1px solid rgba(180, 180, 194, 0.85);
   transition:
     background-color 240ms ease,
     border-color 240ms ease,
@@ -1192,4 +1192,22 @@ footer p {
   border-color: #b86b23;
   box-shadow: 0 0 9px rgba(255, 190, 92, 0.95);
   transform: translate(-50%, -50%) scale(1.26);
+}
+
+/* Ambient Floating Gothic Petals & Golden Dust */
+.gothic-ambient-canvas {
+  position: fixed;
+  inset: 0;
+  width: 100vw;
+  height: 100vh;
+  pointer-events: none;
+  user-select: none;
+  z-index: 35;
+  display: block;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .gothic-ambient-canvas {
+    display: none !important;
+  }
 }

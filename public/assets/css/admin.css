@@ -1,11 +1,11 @@
 :root {
-  --bg: #f5f0e9;
-  --paper: #fffdf9;
-  --beige: #e8ded2;
-  --line: #d5c7bb;
-  --ink: #51443e;
-  --muted: #8e7e73;
-  --accent: #796b63;
+  --bg: #ffffff;
+  --paper: #ffffff;
+  --beige: #f4f4f8;
+  --line: #dfdfe6;
+  --ink: #26242b;
+  --muted: #6e6c78;
+  --accent: #52505c;
 }
 
 * {
@@ -14,7 +14,7 @@
 
 body {
   margin: 0;
-  background: linear-gradient(135deg, #ebe1d6, #f8f4ee);
+  background: linear-gradient(135deg, #f6f6fa, #ffffff);
   color: var(--ink);
   font-family: "Prompt", sans-serif;
   font-weight: 300;
@@ -56,7 +56,7 @@ body {
 .eyebrow {
   font-size: 10px;
   letter-spacing: 0.22em;
-  color: #9e8a7b;
+  color: #7c7a88;
 }
 
 .admin-head h1 {
@@ -65,11 +65,11 @@ body {
 }
 
 .panel {
-  background: rgba(255, 253, 249, 0.94);
+  background: rgba(255, 255, 255, 0.96);
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 22px;
-  box-shadow: 0 10px 28px rgba(81, 68, 62, 0.06);
+  box-shadow: 0 10px 28px rgba(34, 32, 42, 0.06);
 }
 
 .login-panel {
@@ -98,7 +98,7 @@ label {
   display: grid;
   gap: 6px;
   font-size: 12px;
-  color: #6f6057;
+  color: #4f4d59;
 }
 
 input,
@@ -107,7 +107,7 @@ textarea {
   width: 100%;
   font: 12px "Prompt", sans-serif;
   color: var(--ink);
-  background: #fbf8f3;
+  background: #fafafa;
   border: 1px solid var(--line);
   border-radius: 8px;
   padding: 10px 12px;
@@ -117,8 +117,8 @@ textarea {
 input:focus,
 select:focus,
 textarea:focus {
-  border-color: #9c8777;
-  background: #fffdf9;
+  border-color: #8b8999;
+  background: #ffffff;
 }
 
 textarea {
@@ -132,8 +132,8 @@ textarea {
 }
 
 .button {
-  border: 1px solid #8a776a;
-  background: #6b5b51;
+  border: 1px solid #3c3a45;
+  background: #2b2933;
   color: white;
   padding: 10px 18px;
   font: 12px "Prompt", sans-serif;
@@ -147,17 +147,17 @@ textarea {
 }
 
 .button:hover {
-  background: #51443e;
+  background: #1c1a22;
 }
 
 .button.secondary {
-  background: #f3eae0;
+  background: #f3f3f7;
   color: var(--ink);
-  border-color: #bca998;
+  border-color: #c8c8d4;
 }
 
 .button.secondary:hover {
-  background: #e7dacb;
+  background: #e8e8f0;
 }
 
 .button.ghost {
@@ -167,7 +167,7 @@ textarea {
 }
 
 .button.ghost:hover {
-  background: #f5eee6;
+  background: #f3f3f7;
 }
 
 .stats {
@@ -205,7 +205,7 @@ textarea {
 }
 
 .image-slot-card {
-  background: #f9f4ed;
+  background: #fafafd;
   border: 1px solid var(--line);
   border-radius: 12px;
   padding: 14px;
@@ -219,7 +219,7 @@ textarea {
   height: 190px;
   border-radius: 10px;
   overflow: hidden;
-  border: 1px solid #cbb9a9;
+  border: 1px solid #d0d0dc;
   background: var(--beige);
 }
 
@@ -234,7 +234,7 @@ textarea {
   display: flex;
   align-items: center;
   justify-content: center;
-  background: radial-gradient(circle at 50% 50%, #fdfaf5 0%, #eadfd3 100%);
+  background: radial-gradient(circle at 50% 50%, #ffffff 0%, #efeff5 100%);
   padding: 6px;
 }
 
@@ -243,7 +243,7 @@ textarea {
   aspect-ratio: 3 / 2;
   display: block;
   user-select: none;
-  filter: drop-shadow(0 10px 20px rgba(74, 58, 49, 0.16));
+  filter: drop-shadow(0 10px 20px rgba(34, 32, 42, 0.14));
 }
 
 .winged-profile-frame.admin-size {
@@ -294,8 +294,8 @@ textarea {
 .file-upload-label {
   display: inline-block;
   padding: 8px 12px;
-  background: #ede3d7;
-  border: 1px dashed #a99585;
+  background: #f2f2f7;
+  border: 1px dashed #a8a7b5;
   border-radius: 8px;
   text-align: center;
   cursor: pointer;
@@ -304,7 +304,7 @@ textarea {
 }
 
 .file-upload-label:hover {
-  background: #e3d6c7;
+  background: #e8e8f0;
 }
 
 .file-upload-label input[type="file"] {
@@ -341,7 +341,7 @@ textarea {
   gap: 14px;
   align-items: center;
   padding: 12px;
-  background: #f9f4ed;
+  background: #fafafd;
   border: 1px solid var(--line);
   border-radius: 10px;
 }
@@ -352,7 +352,7 @@ textarea {
   height: auto;
   object-fit: cover;
   border-radius: 8px;
-  border: 1px solid #c9b8a8;
+  border: 1px solid #d0d0dc;
   background: var(--beige);
   display: block;
 }
@@ -366,7 +366,7 @@ textarea {
 
 .message {
   font-size: 12px;
-  color: #62754f;
+  color: #4f6b56;
   margin: 0;
 }
 
@@ -389,9 +389,9 @@ textarea {
   align-items: center;
   gap: 12px;
   padding: 10px 12px;
-  border: 1px solid #e5dbd2;
+  border: 1px solid #e4e4ec;
   border-radius: 10px;
-  background: #fbf8f3;
+  background: #fafafd;
 }
 
 .account-row img {
