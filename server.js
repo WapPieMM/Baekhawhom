@@ -29,7 +29,7 @@ const DEFAULT_SETTINGS = {
   shop_status: 'เปิดให้บริการ',
   hero_girl_url: '/assets/images/theme/hero_girl.jpg',
   hero_bunny_url: '/assets/images/theme/hero_bunny.jpg',
-  hero_bg_url: '/src/assets/images/hero_creamy_gothic_banner_1794387724797.jpg',
+  hero_bg_url: '/assets/aistudio/IMG_0003_034758dd.jpeg',
   card_1_url: '/assets/images/theme/card_portrait_1.jpg',
   card_2_url: '/assets/images/theme/card_portrait_2.jpg',
   card_3_url: '/assets/images/theme/card_portrait_3.jpg',
