@@ -18,7 +18,13 @@
 
 body {
   margin: 0;
-  background: #f4f4f7;
+  background-color: #eef1ec;
+  background-image:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.32) 0%, rgba(247, 248, 244, 0.42) 100%),
+    url("/assets/aistudio/IMG_0003_034758dd.jpeg");
+  background-size: cover;
+  background-position: center top;
+  background-attachment: fixed;
   color: var(--ink);
   font-family: "Prompt", sans-serif;
   font-weight: 300;
@@ -29,8 +35,8 @@ body {
   max-width: 1440px;
   margin: 0 auto;
   min-height: 100vh;
-  background: var(--cream);
-  border-inline: 1px solid #e2e2ea;
+  background: rgba(255, 255, 255, 0.78);
+  border-inline: 1px solid rgba(216, 218, 212, 0.85);
   display: flex;
   flex-direction: column;
 }
@@ -131,7 +137,9 @@ nav a[aria-current="page"] {
 
 .intro {
   padding: 0 clamp(20px, 5vw, 72px) 34px;
-  background: radial-gradient(ellipse at 30% 20%, #ffffff, #f3f3f8);
+  background:
+    linear-gradient(180deg, rgba(255, 255, 255, 0.58) 0%, rgba(250, 251, 248, 0.76) 100%),
+    url("/assets/aistudio/IMG_0003_034758dd.jpeg") center top / cover no-repeat;
   border-bottom: 1px solid var(--line);
   overflow: hidden;
 }
@@ -350,6 +358,7 @@ nav a[aria-current="page"] {
 }
 
 .card {
+  position: relative;
   background: var(--paper);
   border: 1px solid var(--line);
   border-radius: 16px;
@@ -360,12 +369,25 @@ nav a[aria-current="page"] {
   transition: transform 180ms var(--ease-out), box-shadow 180ms var(--ease-out);
 }
 
+.card-vine-climber {
+  position: absolute;
+  top: -8px;
+  right: -10px;
+  width: 64px;
+  height: auto;
+  pointer-events: none;
+  user-select: none;
+  z-index: 3;
+  transform: scaleX(-1) rotate(-10deg);
+}
+
 .card:hover {
   transform: translateY(-3px);
   box-shadow: var(--shadow-elevated);
 }
 
 .card-media {
+  position: relative;
   width: 100%;
   aspect-ratio: 16 / 9;
   border-radius: 11px;
@@ -709,17 +731,7 @@ footer p {
 }
 
 .gothic-cursor-particle {
-  position: fixed;
-  top: 0;
-  left: 0;
-  pointer-events: none;
-  user-select: none;
-  font-size: 11px;
-  line-height: 1;
-  color: #6c6a7a;
-  text-shadow: 0 1px 4px rgba(255, 255, 255, 0.95);
-  opacity: 0;
-  will-change: transform, opacity;
+  display: none !important;
 }
 
 @media (hover: none), (pointer: coarse), (prefers-reduced-motion: reduce) {
@@ -1032,20 +1044,7 @@ footer p {
   display: none !important;
 }
 
-/* Ambient Floating Gothic Petals & Golden Dust */
+/* Ambient Floating Particles Removed */
 .gothic-ambient-canvas {
-  position: fixed;
-  inset: 0;
-  width: 100vw;
-  height: 100vh;
-  pointer-events: none;
-  user-select: none;
-  z-index: 35;
-  display: block;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .gothic-ambient-canvas {
-    display: none !important;
-  }
+  display: none !important;
 }
