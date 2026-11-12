@@ -15,129 +15,157 @@
 </head>
 <body>
   <div class="candelabra-loader" id="candelabraLoader" role="status" aria-live="polite" aria-label="กำลังโหลดหน้าเว็บไซต์">
+    <canvas class="loader-shinkai-canvas" id="loaderShinkaiCanvas" aria-hidden="true"></canvas>
+    <div class="loader-dramatic-vignette" aria-hidden="true"></div>
     <div class="loader-inner">
       <div class="candelabra-stage">
         <svg class="candle-flame-defs" width="0" height="0" aria-hidden="true" focusable="false">
           <defs>
-            <linearGradient id="gothicFlameAuraGrad" x1="22" y1="6" x2="22" y2="92" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#8c3b1e" stop-opacity="0"/>
-              <stop offset="30%" stop-color="#c96b2b" stop-opacity="0.45"/>
-              <stop offset="72%" stop-color="#e89c38" stop-opacity="0.65"/>
-              <stop offset="100%" stop-color="#5968b5" stop-opacity="0.25"/>
+            <linearGradient id="gothicFlameAuraGrad" x1="22" y1="4" x2="22" y2="95" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#ff9a2e" stop-opacity="0"/>
+              <stop offset="30%" stop-color="#ffa834" stop-opacity="0.22"/>
+              <stop offset="72%" stop-color="#ffbe55" stop-opacity="0.34"/>
+              <stop offset="100%" stop-color="#7eb8ff" stop-opacity="0.18"/>
             </linearGradient>
-            <linearGradient id="gothicFlameOuterGrad" x1="22" y1="10" x2="22" y2="91" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#9e431f" stop-opacity="0.88"/>
-              <stop offset="28%" stop-color="#db7f2c" stop-opacity="0.94"/>
-              <stop offset="68%" stop-color="#f5b956" stop-opacity="0.96"/>
-              <stop offset="92%" stop-color="#d98b3a" stop-opacity="0.82"/>
-              <stop offset="100%" stop-color="#4e5ba6" stop-opacity="0.55"/>
+            <linearGradient id="gothicFlameCyanWispGrad" x1="22" y1="45" x2="22" y2="92" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#6ec6ff" stop-opacity="0"/>
+              <stop offset="55%" stop-color="#4da6ff" stop-opacity="0.28"/>
+              <stop offset="88%" stop-color="#2e7de0" stop-opacity="0.46"/>
+              <stop offset="100%" stop-color="#1b4fa8" stop-opacity="0"/>
             </linearGradient>
-            <linearGradient id="gothicFlameMidGrad" x1="22" y1="20" x2="22" y2="89" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#f2a23a" stop-opacity="0.92"/>
-              <stop offset="45%" stop-color="#ffd97d" stop-opacity="0.98"/>
-              <stop offset="85%" stop-color="#fff1c2" stop-opacity="0.98"/>
-              <stop offset="100%" stop-color="#7c8fe0" stop-opacity="0.45"/>
+            <linearGradient id="gothicFlameOuterGrad" x1="22" y1="8" x2="22" y2="92" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#d9480f" stop-opacity="0.92"/>
+              <stop offset="26%" stop-color="#f07818" stop-opacity="0.96"/>
+              <stop offset="62%" stop-color="#f7ad36" stop-opacity="0.98"/>
+              <stop offset="86%" stop-color="#f5c665" stop-opacity="0.9"/>
+              <stop offset="100%" stop-color="#5a95e8" stop-opacity="0.72"/>
             </linearGradient>
-            <linearGradient id="gothicFlameCoreGrad" x1="22" y1="36" x2="22" y2="88" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#fff4cc" stop-opacity="0.95"/>
-              <stop offset="55%" stop-color="#ffffff" stop-opacity="1"/>
-              <stop offset="90%" stop-color="#eef3ff" stop-opacity="0.95"/>
-              <stop offset="100%" stop-color="#6982eb" stop-opacity="0.7"/>
+            <linearGradient id="gothicFlameMidGrad" x1="22" y1="18" x2="22" y2="90" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#f5841a" stop-opacity="0.95"/>
+              <stop offset="38%" stop-color="#ffbe3b" stop-opacity="1"/>
+              <stop offset="78%" stop-color="#ffe89e" stop-opacity="1"/>
+              <stop offset="100%" stop-color="#8cc4ff" stop-opacity="0.78"/>
             </linearGradient>
-            <linearGradient id="gothicSmokeGrad" x1="22" y1="0" x2="22" y2="30" gradientUnits="userSpaceOnUse">
-              <stop offset="0%" stop-color="#2c2428" stop-opacity="0"/>
-              <stop offset="45%" stop-color="#453a40" stop-opacity="0.38"/>
-              <stop offset="100%" stop-color="#6e5d53" stop-opacity="0"/>
+            <linearGradient id="gothicFlameCoreGrad" x1="22" y1="32" x2="22" y2="89" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#ffefb5" stop-opacity="0.96"/>
+              <stop offset="48%" stop-color="#ffffff" stop-opacity="1"/>
+              <stop offset="85%" stop-color="#fffdf5" stop-opacity="0.98"/>
+              <stop offset="100%" stop-color="#7ab8ff" stop-opacity="0.88"/>
+            </linearGradient>
+            <linearGradient id="gothicSmokeGrad" x1="22" y1="0" x2="22" y2="28" gradientUnits="userSpaceOnUse">
+              <stop offset="0%" stop-color="#8b8694" stop-opacity="0"/>
+              <stop offset="50%" stop-color="#7b7685" stop-opacity="0.32"/>
+              <stop offset="100%" stop-color="#5c5766" stop-opacity="0"/>
             </linearGradient>
           </defs>
         </svg>
         <img
           class="candelabra-base-img"
           src="/assets/images/theme/candelabra_unlit.png"
-          alt="เชิงเทียนโบว์สีครีมกอธิคพร้อมเทียนสีดำ"
+          alt="เชิงเทียนโบว์สีขาวกอธิคพร้อมเทียนสีดำ"
         >
         <div class="candle-flame-slot c1" data-candle="1">
+          <span class="candle-cyan-aura"></span>
           <span class="candle-halo"></span>
+          <span class="candle-shinkai-flare"></span>
           <span class="candle-wax-glow"></span>
           <span class="candle-ember e1"></span>
           <span class="candle-ember e2"></span>
+          <span class="candle-ember e3"></span>
           <span class="candle-spark">✦</span>
           <svg class="candle-flame-svg" viewBox="0 0 44 100" fill="none" aria-hidden="true">
             <path class="flame-smoke" d="M22 26C19 18 25 11 21 2" stroke="url(#gothicSmokeGrad)" stroke-width="1.8" stroke-linecap="round"/>
-            <path class="flame-aura" d="M22 8C13 29 5 48 6 69C7 84 13.5 93 22 94C30.5 93 37 84 38 69C39 48 31 29 22 8Z" fill="url(#gothicFlameAuraGrad)"/>
-            <path class="flame-outer" d="M22 12C15.5 29 8.5 47 9.5 67C10.3 81 15 90 22 91C29 90 33.7 81 34.5 67C35.5 47 28.5 29 22 12Z" fill="url(#gothicFlameOuterGrad)"/>
-            <path class="flame-mid" d="M22 23C17 37 12.2 52 13 68C13.7 79 17.2 87 22 88.5C26.8 87 30.3 79 31 68C31.8 52 27 37 22 23Z" fill="url(#gothicFlameMidGrad)"/>
-            <ellipse class="flame-base-blue" cx="22" cy="86.5" rx="6.2" ry="5.2"/>
-            <path class="flame-core" d="M22 39C18.8 50 16 60 16.5 72C17 80.5 19.2 86 22 87C24.8 86 27 80.5 27.5 72C28 60 25.2 50 22 39Z" fill="url(#gothicFlameCoreGrad)"/>
-            <circle class="wick-ember" cx="22" cy="90.5" r="1.6"/>
+            <path class="flame-aura" d="M22 5C11 27 3 47 4.5 69C5.5 85 13 94 22 95C31 94 38.5 85 39.5 69C41 47 33 27 22 5Z" fill="url(#gothicFlameAuraGrad)"/>
+            <path class="flame-cyan-wisp" d="M22 7C12 25 6 45 8 66C9 79 14 89 22 92C14 84 11 70 13 53C15 36 19 22 22 7ZM22 9C31 27 37 46 35.5 66C34.5 79 29.5 89 22 92C29.5 84 32.5 70 30.5 53C28.5 36 24.5 22 22 9Z" fill="url(#gothicFlameCyanWispGrad)"/>
+            <path class="flame-outer" d="M22 11C15 28 8 46 9 67C9.8 81 14.8 90 22 91.5C29.2 90 34.2 81 35 67C36 46 29 28 22 11Z" fill="url(#gothicFlameOuterGrad)"/>
+            <path class="flame-mid" d="M22 21C16.8 36 12 51 12.8 68C13.5 79 17 87 22 88.8C27 87 30.5 79 31.2 68C32 51 27.2 36 22 21Z" fill="url(#gothicFlameMidGrad)"/>
+            <ellipse class="flame-base-blue" cx="22" cy="87" rx="7.2" ry="5.8"/>
+            <path class="flame-core" d="M22 36C18.6 48 15.8 59 16.3 72C16.8 80.5 19 86.2 22 87.2C25 86.2 27.2 80.5 27.7 72C28.2 59 25.4 48 22 36Z" fill="url(#gothicFlameCoreGrad)"/>
+            <circle class="wick-ember" cx="22" cy="90.5" r="1.8"/>
           </svg>
         </div>
 
         <div class="candle-flame-slot c2" data-candle="2">
+          <span class="candle-cyan-aura"></span>
           <span class="candle-halo"></span>
+          <span class="candle-shinkai-flare"></span>
           <span class="candle-wax-glow"></span>
           <span class="candle-ember e1"></span>
           <span class="candle-ember e2"></span>
+          <span class="candle-ember e3"></span>
           <span class="candle-spark">✦</span>
           <svg class="candle-flame-svg" viewBox="0 0 44 100" fill="none" aria-hidden="true">
             <path class="flame-smoke" d="M22 26C25 18 19 11 23 2" stroke="url(#gothicSmokeGrad)" stroke-width="1.8" stroke-linecap="round"/>
-            <path class="flame-aura" d="M22 8C13 29 5 48 6 69C7 84 13.5 93 22 94C30.5 93 37 84 38 69C39 48 31 29 22 8Z" fill="url(#gothicFlameAuraGrad)"/>
-            <path class="flame-outer" d="M22 12C15.5 29 8.5 47 9.5 67C10.3 81 15 90 22 91C29 90 33.7 81 34.5 67C35.5 47 28.5 29 22 12Z" fill="url(#gothicFlameOuterGrad)"/>
-            <path class="flame-mid" d="M22 23C17 37 12.2 52 13 68C13.7 79 17.2 87 22 88.5C26.8 87 30.3 79 31 68C31.8 52 27 37 22 23Z" fill="url(#gothicFlameMidGrad)"/>
-            <ellipse class="flame-base-blue" cx="22" cy="86.5" rx="6.2" ry="5.2"/>
-            <path class="flame-core" d="M22 39C18.8 50 16 60 16.5 72C17 80.5 19.2 86 22 87C24.8 86 27 80.5 27.5 72C28 60 25.2 50 22 39Z" fill="url(#gothicFlameCoreGrad)"/>
-            <circle class="wick-ember" cx="22" cy="90.5" r="1.6"/>
+            <path class="flame-aura" d="M22 5C11 27 3 47 4.5 69C5.5 85 13 94 22 95C31 94 38.5 85 39.5 69C41 47 33 27 22 5Z" fill="url(#gothicFlameAuraGrad)"/>
+            <path class="flame-cyan-wisp" d="M22 7C12 25 6 45 8 66C9 79 14 89 22 92C14 84 11 70 13 53C15 36 19 22 22 7ZM22 9C31 27 37 46 35.5 66C34.5 79 29.5 89 22 92C29.5 84 32.5 70 30.5 53C28.5 36 24.5 22 22 9Z" fill="url(#gothicFlameCyanWispGrad)"/>
+            <path class="flame-outer" d="M22 11C15 28 8 46 9 67C9.8 81 14.8 90 22 91.5C29.2 90 34.2 81 35 67C36 46 29 28 22 11Z" fill="url(#gothicFlameOuterGrad)"/>
+            <path class="flame-mid" d="M22 21C16.8 36 12 51 12.8 68C13.5 79 17 87 22 88.8C27 87 30.5 79 31.2 68C32 51 27.2 36 22 21Z" fill="url(#gothicFlameMidGrad)"/>
+            <ellipse class="flame-base-blue" cx="22" cy="87" rx="7.2" ry="5.8"/>
+            <path class="flame-core" d="M22 36C18.6 48 15.8 59 16.3 72C16.8 80.5 19 86.2 22 87.2C25 86.2 27.2 80.5 27.7 72C28.2 59 25.4 48 22 36Z" fill="url(#gothicFlameCoreGrad)"/>
+            <circle class="wick-ember" cx="22" cy="90.5" r="1.8"/>
           </svg>
         </div>
 
         <div class="candle-flame-slot c3" data-candle="3">
+          <span class="candle-cyan-aura"></span>
           <span class="candle-halo"></span>
+          <span class="candle-shinkai-flare"></span>
           <span class="candle-wax-glow"></span>
           <span class="candle-ember e1"></span>
           <span class="candle-ember e2"></span>
+          <span class="candle-ember e3"></span>
           <span class="candle-spark">✦</span>
           <svg class="candle-flame-svg" viewBox="0 0 44 100" fill="none" aria-hidden="true">
             <path class="flame-smoke" d="M22 26C19 17 25 10 22 1" stroke="url(#gothicSmokeGrad)" stroke-width="1.9" stroke-linecap="round"/>
-            <path class="flame-aura" d="M22 8C13 29 5 48 6 69C7 84 13.5 93 22 94C30.5 93 37 84 38 69C39 48 31 29 22 8Z" fill="url(#gothicFlameAuraGrad)"/>
-            <path class="flame-outer" d="M22 12C15.5 29 8.5 47 9.5 67C10.3 81 15 90 22 91C29 90 33.7 81 34.5 67C35.5 47 28.5 29 22 12Z" fill="url(#gothicFlameOuterGrad)"/>
-            <path class="flame-mid" d="M22 23C17 37 12.2 52 13 68C13.7 79 17.2 87 22 88.5C26.8 87 30.3 79 31 68C31.8 52 27 37 22 23Z" fill="url(#gothicFlameMidGrad)"/>
-            <ellipse class="flame-base-blue" cx="22" cy="86.5" rx="6.2" ry="5.2"/>
-            <path class="flame-core" d="M22 39C18.8 50 16 60 16.5 72C17 80.5 19.2 86 22 87C24.8 86 27 80.5 27.5 72C28 60 25.2 50 22 39Z" fill="url(#gothicFlameCoreGrad)"/>
-            <circle class="wick-ember" cx="22" cy="90.5" r="1.6"/>
+            <path class="flame-aura" d="M22 5C11 27 3 47 4.5 69C5.5 85 13 94 22 95C31 94 38.5 85 39.5 69C41 47 33 27 22 5Z" fill="url(#gothicFlameAuraGrad)"/>
+            <path class="flame-cyan-wisp" d="M22 7C12 25 6 45 8 66C9 79 14 89 22 92C14 84 11 70 13 53C15 36 19 22 22 7ZM22 9C31 27 37 46 35.5 66C34.5 79 29.5 89 22 92C29.5 84 32.5 70 30.5 53C28.5 36 24.5 22 22 9Z" fill="url(#gothicFlameCyanWispGrad)"/>
+            <path class="flame-outer" d="M22 11C15 28 8 46 9 67C9.8 81 14.8 90 22 91.5C29.2 90 34.2 81 35 67C36 46 29 28 22 11Z" fill="url(#gothicFlameOuterGrad)"/>
+            <path class="flame-mid" d="M22 21C16.8 36 12 51 12.8 68C13.5 79 17 87 22 88.8C27 87 30.5 79 31.2 68C32 51 27.2 36 22 21Z" fill="url(#gothicFlameMidGrad)"/>
+            <ellipse class="flame-base-blue" cx="22" cy="87" rx="7.2" ry="5.8"/>
+            <path class="flame-core" d="M22 36C18.6 48 15.8 59 16.3 72C16.8 80.5 19 86.2 22 87.2C25 86.2 27.2 80.5 27.7 72C28.2 59 25.4 48 22 36Z" fill="url(#gothicFlameCoreGrad)"/>
+            <circle class="wick-ember" cx="22" cy="90.5" r="1.8"/>
           </svg>
         </div>
 
         <div class="candle-flame-slot c4" data-candle="4">
+          <span class="candle-cyan-aura"></span>
           <span class="candle-halo"></span>
+          <span class="candle-shinkai-flare"></span>
           <span class="candle-wax-glow"></span>
           <span class="candle-ember e1"></span>
           <span class="candle-ember e2"></span>
+          <span class="candle-ember e3"></span>
           <span class="candle-spark">✦</span>
           <svg class="candle-flame-svg" viewBox="0 0 44 100" fill="none" aria-hidden="true">
             <path class="flame-smoke" d="M22 26C25 18 19 11 23 2" stroke="url(#gothicSmokeGrad)" stroke-width="1.8" stroke-linecap="round"/>
-            <path class="flame-aura" d="M22 8C13 29 5 48 6 69C7 84 13.5 93 22 94C30.5 93 37 84 38 69C39 48 31 29 22 8Z" fill="url(#gothicFlameAuraGrad)"/>
-            <path class="flame-outer" d="M22 12C15.5 29 8.5 47 9.5 67C10.3 81 15 90 22 91C29 90 33.7 81 34.5 67C35.5 47 28.5 29 22 12Z" fill="url(#gothicFlameOuterGrad)"/>
-            <path class="flame-mid" d="M22 23C17 37 12.2 52 13 68C13.7 79 17.2 87 22 88.5C26.8 87 30.3 79 31 68C31.8 52 27 37 22 23Z" fill="url(#gothicFlameMidGrad)"/>
-            <ellipse class="flame-base-blue" cx="22" cy="86.5" rx="6.2" ry="5.2"/>
-            <path class="flame-core" d="M22 39C18.8 50 16 60 16.5 72C17 80.5 19.2 86 22 87C24.8 86 27 80.5 27.5 72C28 60 25.2 50 22 39Z" fill="url(#gothicFlameCoreGrad)"/>
-            <circle class="wick-ember" cx="22" cy="90.5" r="1.6"/>
+            <path class="flame-aura" d="M22 5C11 27 3 47 4.5 69C5.5 85 13 94 22 95C31 94 38.5 85 39.5 69C41 47 33 27 22 5Z" fill="url(#gothicFlameAuraGrad)"/>
+            <path class="flame-cyan-wisp" d="M22 7C12 25 6 45 8 66C9 79 14 89 22 92C14 84 11 70 13 53C15 36 19 22 22 7ZM22 9C31 27 37 46 35.5 66C34.5 79 29.5 89 22 92C29.5 84 32.5 70 30.5 53C28.5 36 24.5 22 22 9Z" fill="url(#gothicFlameCyanWispGrad)"/>
+            <path class="flame-outer" d="M22 11C15 28 8 46 9 67C9.8 81 14.8 90 22 91.5C29.2 90 34.2 81 35 67C36 46 29 28 22 11Z" fill="url(#gothicFlameOuterGrad)"/>
+            <path class="flame-mid" d="M22 21C16.8 36 12 51 12.8 68C13.5 79 17 87 22 88.8C27 87 30.5 79 31.2 68C32 51 27.2 36 22 21Z" fill="url(#gothicFlameMidGrad)"/>
+            <ellipse class="flame-base-blue" cx="22" cy="87" rx="7.2" ry="5.8"/>
+            <path class="flame-core" d="M22 36C18.6 48 15.8 59 16.3 72C16.8 80.5 19 86.2 22 87.2C25 86.2 27.2 80.5 27.7 72C28.2 59 25.4 48 22 36Z" fill="url(#gothicFlameCoreGrad)"/>
+            <circle class="wick-ember" cx="22" cy="90.5" r="1.8"/>
           </svg>
         </div>
 
         <div class="candle-flame-slot c5" data-candle="5">
+          <span class="candle-cyan-aura"></span>
           <span class="candle-halo"></span>
+          <span class="candle-shinkai-flare"></span>
           <span class="candle-wax-glow"></span>
           <span class="candle-ember e1"></span>
           <span class="candle-ember e2"></span>
+          <span class="candle-ember e3"></span>
           <span class="candle-spark">✦</span>
           <svg class="candle-flame-svg" viewBox="0 0 44 100" fill="none" aria-hidden="true">
             <path class="flame-smoke" d="M22 26C19 18 25 11 21 2" stroke="url(#gothicSmokeGrad)" stroke-width="1.8" stroke-linecap="round"/>
-            <path class="flame-aura" d="M22 8C13 29 5 48 6 69C7 84 13.5 93 22 94C30.5 93 37 84 38 69C39 48 31 29 22 8Z" fill="url(#gothicFlameAuraGrad)"/>
-            <path class="flame-outer" d="M22 12C15.5 29 8.5 47 9.5 67C10.3 81 15 90 22 91C29 90 33.7 81 34.5 67C35.5 47 28.5 29 22 12Z" fill="url(#gothicFlameOuterGrad)"/>
-            <path class="flame-mid" d="M22 23C17 37 12.2 52 13 68C13.7 79 17.2 87 22 88.5C26.8 87 30.3 79 31 68C31.8 52 27 37 22 23Z" fill="url(#gothicFlameMidGrad)"/>
-            <ellipse class="flame-base-blue" cx="22" cy="86.5" rx="6.2" ry="5.2"/>
-            <path class="flame-core" d="M22 39C18.8 50 16 60 16.5 72C17 80.5 19.2 86 22 87C24.8 86 27 80.5 27.5 72C28 60 25.2 50 22 39Z" fill="url(#gothicFlameCoreGrad)"/>
-            <circle class="wick-ember" cx="22" cy="90.5" r="1.6"/>
+            <path class="flame-aura" d="M22 5C11 27 3 47 4.5 69C5.5 85 13 94 22 95C31 94 38.5 85 39.5 69C41 47 33 27 22 5Z" fill="url(#gothicFlameAuraGrad)"/>
+            <path class="flame-cyan-wisp" d="M22 7C12 25 6 45 8 66C9 79 14 89 22 92C14 84 11 70 13 53C15 36 19 22 22 7ZM22 9C31 27 37 46 35.5 66C34.5 79 29.5 89 22 92C29.5 84 32.5 70 30.5 53C28.5 36 24.5 22 22 9Z" fill="url(#gothicFlameCyanWispGrad)"/>
+            <path class="flame-outer" d="M22 11C15 28 8 46 9 67C9.8 81 14.8 90 22 91.5C29.2 90 34.2 81 35 67C36 46 29 28 22 11Z" fill="url(#gothicFlameOuterGrad)"/>
+            <path class="flame-mid" d="M22 21C16.8 36 12 51 12.8 68C13.5 79 17 87 22 88.8C27 87 30.5 79 31.2 68C32 51 27.2 36 22 21Z" fill="url(#gothicFlameMidGrad)"/>
+            <ellipse class="flame-base-blue" cx="22" cy="87" rx="7.2" ry="5.8"/>
+            <path class="flame-core" d="M22 36C18.6 48 15.8 59 16.3 72C16.8 80.5 19 86.2 22 87.2C25 86.2 27.2 80.5 27.7 72C28.2 59 25.4 48 22 36Z" fill="url(#gothicFlameCoreGrad)"/>
+            <circle class="wick-ember" cx="22" cy="90.5" r="1.8"/>
           </svg>
         </div>
       </div>

@@ -395,12 +395,55 @@
     const percentEl = document.getElementById("loaderPercentText");
     const statusEl = document.getElementById("loaderStatusLabel");
     const candleSlots = Array.from(loader.querySelectorAll(".candle-flame-slot"));
-    const ticks = Array.from(loader.querySelectorAll(".loader-candle-ticks .tick"));
     const thresholds = [16, 36, 56, 76, 92];
+
+    const flameRig = candleSlots.map((slot, i) => ({
+      slot,
+      aura: slot.querySelector(".flame-aura"),
+      outer: slot.querySelector(".flame-outer"),
+      mid: slot.querySelector(".flame-mid"),
+      core: slot.querySelector(".flame-core"),
+      smoke: slot.querySelector(".flame-smoke"),
+      seed: i * 2.17 + 0.65,
+      gustOffset: 0,
+      gustVel: 0
+    }));
+
+    function buildFlamePath(baseY, topY, halfWidth, dxLow, dxMid, dxTip) {
+      const tipX = (22 + dxTip).toFixed(2);
+      const tY = topY.toFixed(2);
+      const bY = baseY.toFixed(2);
+      const spanY = baseY - topY;
+      const yUpper = (topY + spanY * 0.34).toFixed(2);
+      const yLower = (topY + spanY * 0.68).toFixed(2);
+      const yBaseCtrl = (baseY - spanY * 0.04).toFixed(2);
+
+      const lxUpper = (22 - halfWidth * 0.62 + dxMid).toFixed(2);
+      const rxUpper = (22 + halfWidth * 0.62 + dxMid).toFixed(2);
+
+      const lxLower = (22 - halfWidth * 1.06 + dxLow).toFixed(2);
+      const rxLower = (22 + halfWidth * 1.06 + dxLow).toFixed(2);
+
+      const lxBelly = (22 - halfWidth * 0.92 + dxLow * 0.45).toFixed(2);
+      const rxBelly = (22 + halfWidth * 0.92 + dxLow * 0.45).toFixed(2);
+
+      const yBelly = (topY + spanY * 0.82).toFixed(2);
+      const lxBase = (22 - halfWidth * 0.42).toFixed(2);
+      const rxBase = (22 + halfWidth * 0.42).toFixed(2);
+
+      return (
+        "M" + tipX + " " + tY +
+        "C" + lxUpper + " " + yUpper + " " + lxLower + " " + yLower + " " + lxBelly + " " + yBelly +
+        "C" + (22 - halfWidth * 0.78 + dxLow * 0.18).toFixed(2) + " " + yBaseCtrl + " " + lxBase + " " + bY + " 22 " + bY +
+        "C" + rxBase + " " + bY + " " + (22 + halfWidth * 0.78 + dxLow * 0.18).toFixed(2) + " " + yBaseCtrl + " " + rxBelly + " " + yBelly +
+        "C" + rxLower + " " + yLower + " " + rxUpper + " " + yUpper + " " + tipX + " " + tY + "Z"
+      );
+    }
 
     let progress = 0;
     let finishing = false;
     let finishTime = 0;
+    let prevNow = performance.now();
     let pageReady = document.readyState === "complete";
     window.addEventListener(
       "load",
@@ -411,29 +454,103 @@
     );
 
     const startTime = performance.now();
-    const minDuration = 2050;
+    const minDuration = 2150;
 
-    function updateFlamePhysics(now) {
+    function updateFlamePhysics(now, dt) {
       const t = now * 0.001;
-      for (let i = 0; i < candleSlots.length; i++) {
-        const slot = candleSlots[i];
+      const roomDraft =
+        Math.sin(t * 1.45) * 1.15 +
+        Math.sin(t * 3.1 - 0.8) * 0.65;
+
+      for (let i = 0; i < flameRig.length; i++) {
+        const rig = flameRig[i];
+        const slot = rig.slot;
         if (!slot || !slot.classList.contains("is-lit")) continue;
-        const seed = i * 1.73 + 0.4;
-        const wind =
-          Math.sin(t * 5.4 + seed) * 2.1 +
-          Math.sin(t * 11.8 + seed * 1.9) * 1.15 +
-          Math.cos(t * 2.7 - seed) * 0.85;
-        const stretch =
-          1 +
-          Math.sin(t * 8.6 + seed * 1.3) * 0.048 +
-          Math.cos(t * 15.2 + seed) * 0.024;
+
+        const s = rig.seed;
+        if (Math.random() < dt * 2.2) {
+          rig.gustVel += (Math.random() - 0.5) * 9.5;
+        }
+        rig.gustVel += (-rig.gustOffset * 14 - rig.gustVel * 5.2) * dt;
+        rig.gustOffset += rig.gustVel * dt;
+
+        const waveFreq = 7.4 + (i % 2) * 0.55;
+        const wLow = Math.sin(t * waveFreq + s);
+        const wMid = Math.sin(t * waveFreq + s - 0.85) + Math.cos(t * 4.3 + s * 1.4) * 0.45;
+        const wTip =
+          Math.sin(t * waveFreq + s - 1.75) +
+          Math.sin(t * 13.6 + s * 2.1) * 0.38 +
+          Math.cos(t * 3.7 - s) * 0.52;
+
+        const dxLow = roomDraft * 0.25 + rig.gustOffset * 0.3 + wLow * 0.65;
+        const dxMid = roomDraft * 0.75 + rig.gustOffset * 0.85 + wMid * 1.65;
+        const dxTip = roomDraft * 1.45 + rig.gustOffset * 1.65 + wTip * 3.15;
+
+        const thermalPulse =
+          Math.sin(t * 9.8 + s * 1.3) * 2.4 +
+          Math.cos(t * 16.4 + s * 0.7) * 1.15 +
+          Math.sin(t * 4.1 - s) * 1.4;
+
+        const widthMod = 1 + thermalPulse * 0.016;
+
+        if (rig.outer) {
+          rig.outer.setAttribute(
+            "d",
+            buildFlamePath(91.5, 11.5 + thermalPulse, 13.0 * widthMod, dxLow, dxMid, dxTip)
+          );
+        }
+        if (rig.mid) {
+          rig.mid.setAttribute(
+            "d",
+            buildFlamePath(
+              89.2,
+              21.0 + thermalPulse * 0.85,
+              9.2 * widthMod,
+              dxLow * 0.82,
+              dxMid * 0.85,
+              dxTip * 0.86
+            )
+          );
+        }
+        if (rig.core) {
+          rig.core.setAttribute(
+            "d",
+            buildFlamePath(
+              87.5,
+              36.0 + thermalPulse * 0.55,
+              5.6 * widthMod,
+              dxLow * 0.55,
+              dxMid * 0.58,
+              dxTip * 0.55
+            )
+          );
+        }
+        if (rig.aura) {
+          rig.aura.setAttribute(
+            "d",
+            buildFlamePath(
+              95.0,
+              5.5 + thermalPulse * 1.05,
+              17.2 * widthMod,
+              dxLow * 0.9,
+              dxMid * 0.95,
+              dxTip * 1.05
+            )
+          );
+        }
+        if (rig.smoke) {
+          const sx1 = (22 + dxTip * 0.8).toFixed(1);
+          const sx2 = (22 + dxMid * 1.3).toFixed(1);
+          const sx3 = (22 + dxTip * 1.25).toFixed(1);
+          rig.smoke.setAttribute("d", "M" + sx1 + " 24C" + sx2 + " 16 " + sx3 + " 9 " + sx1 + " 2");
+        }
+
         const halo =
           0.92 +
-          Math.sin(t * 7.2 + seed) * 0.08 +
-          Math.sin(t * 13.5 + seed * 2.1) * 0.04;
-
-        slot.style.setProperty("--flicker-lean", wind.toFixed(2) + "deg");
-        slot.style.setProperty("--flicker-stretch", stretch.toFixed(3));
+          Math.sin(t * 6.8 + s) * 0.06 +
+          Math.sin(t * 12.5 + s * 2.1) * 0.03;
+        slot.style.setProperty("--flicker-lean", (roomDraft * 0.45).toFixed(2) + "deg");
+        slot.style.setProperty("--flicker-stretch", "1");
         slot.style.setProperty("--halo-Dynamic", halo.toFixed(3));
       }
     }
@@ -448,8 +565,9 @@
         const isLit = clamped >= thresholds[i];
         if (isLit) litCount++;
         if (candleSlots[i]) candleSlots[i].classList.toggle("is-lit", isLit);
-        if (ticks[i]) ticks[i].classList.toggle("is-lit", isLit);
       }
+
+      loader.style.setProperty("--lit-progress", (clamped / 100).toFixed(3));
 
       if (statusEl) {
         statusEl.textContent =
@@ -460,6 +578,9 @@
     }
 
     function step(now) {
+      const dt = Math.min(0.05, Math.max(0.001, (now - prevNow) * 0.001));
+      prevNow = now;
+
       const elapsed = now - startTime;
       const timeRatio = Math.min(1, elapsed / minDuration);
       const eased =
@@ -475,7 +596,7 @@
       }
 
       updateUI(finishing ? 100 : progress);
-      updateFlamePhysics(now);
+      updateFlamePhysics(now, dt);
 
       if (!finishing) {
         if (progress >= 99.6) {
@@ -490,7 +611,7 @@
           }, 420);
         }
         requestAnimationFrame(step);
-      } else if (now - finishTime < 1100) {
+      } else if (now - finishTime < 1150) {
         requestAnimationFrame(step);
       }
     }
@@ -532,12 +653,12 @@
     resize();
     window.addEventListener("resize", resize, { passive: true });
 
-    const PARTICLE_COUNT = 26;
+    const PARTICLE_COUNT = 20;
     const particles = [];
 
     function createParticle(initialRandomY) {
       const rand = Math.random();
-      const kind = rand < 0.48 ? "petal" : rand < 0.78 ? "dust" : "star";
+      const kind = rand < 0.72 ? "petal" : "star";
       const isDarkPetal = kind === "petal" && Math.random() < 0.42;
       const depth = 0.45 + Math.random() * 0.65;
 
@@ -548,13 +669,11 @@
         x: Math.random() * width,
         y: initialRandomY ? Math.random() * height : -24 - Math.random() * 80,
         vx: (Math.random() - 0.35) * 11 * depth,
-        vy: (kind === "dust" ? 8 + Math.random() * 12 : 13 + Math.random() * 18) * depth,
+        vy: (13 + Math.random() * 18) * depth,
         size:
           kind === "petal"
             ? (5.2 + Math.random() * 4.8) * depth
-            : kind === "star"
-              ? (3.6 + Math.random() * 3.2) * depth
-              : (1.5 + Math.random() * 2.2) * depth,
+            : (3.4 + Math.random() * 2.8) * depth,
         rot: Math.random() * Math.PI * 2,
         rotSpeed: (Math.random() - 0.5) * 1.35,
         flip: Math.random() * Math.PI * 2,
@@ -568,8 +687,8 @@
           kind === "petal"
             ? isDarkPetal
               ? 0.26 + Math.random() * 0.22
-              : 0.56 + Math.random() * 0.28
-            : 0.34 + Math.random() * 0.4
+              : 0.55 + Math.random() * 0.25
+            : 0.32 + Math.random() * 0.32
       };
     }
 
@@ -633,24 +752,7 @@
       ctx.quadraticCurveTo(0, 0, 0, -s);
       ctx.closePath();
 
-      ctx.fillStyle = "#c9b38c";
-      ctx.shadowColor = "rgba(212, 190, 148, 0.65)";
-      ctx.shadowBlur = 6;
-      ctx.fill();
-      ctx.restore();
-    }
-
-    function drawDust(p, alpha) {
-      const r = p.size;
-      ctx.save();
-      ctx.globalAlpha = alpha;
-      const grad = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, r * 2.4);
-      grad.addColorStop(0, "rgba(218, 198, 158, 0.95)");
-      grad.addColorStop(0.5, "rgba(182, 178, 196, 0.5)");
-      grad.addColorStop(1, "rgba(182, 178, 196, 0)");
-      ctx.fillStyle = grad;
-      ctx.beginPath();
-      ctx.arc(p.x, p.y, r * 2.4, 0, Math.PI * 2);
+      ctx.fillStyle = "#9896a6";
       ctx.fill();
       ctx.restore();
     }
@@ -687,10 +789,8 @@
 
           if (p.kind === "petal") {
             drawPetal(p, alpha);
-          } else if (p.kind === "star") {
-            drawStar(p, alpha);
           } else {
-            drawDust(p, alpha);
+            drawStar(p, alpha);
           }
         }
       }
