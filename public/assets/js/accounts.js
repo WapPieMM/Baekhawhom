@@ -20,6 +20,24 @@
   let category = "all";
   let status = "available";
   const catName = { chicken_skin: "ไอดีไก่สกิน", normal: "ไอดีปกติ" };
+  const statusLabel = { available: "พร้อมขาย", installment: "ติดผ่อน", sold: "ขายแล้ว" };
+  const INSTALLMENT_TAG_RE = /\s*\[status:installment\]\s*$/;
+
+  function normalizeAccountRow(row) {
+    if (!row || typeof row !== "object") return row;
+    const rawDesc = String(row.description || "");
+    const hasTag = INSTALLMENT_TAG_RE.test(rawDesc);
+    return {
+      ...row,
+      status: hasTag ? "installment" : row.status,
+      description: rawDesc.replace(INSTALLMENT_TAG_RE, "")
+    };
+  }
+
+  function isSoldTabGroup(st) {
+    return st === "sold" || st === "installment";
+  }
+
   const esc = (s) =>
     String(s ?? "").replace(/[&<>"']/g, (c) =>
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
@@ -88,13 +106,15 @@
 
   function render() {
     const matches = rows.filter(
-      (x) => (category === "all" || x.category === category) && x.status === status
+      (x) =>
+        (category === "all" || x.category === category) &&
+        (status === "available" ? x.status === "available" : isSoldTabGroup(x.status))
     );
     $("availableCount").textContent = rows.filter(
       (x) => (category === "all" || x.category === category) && x.status === "available"
     ).length;
     $("soldCount").textContent = rows.filter(
-      (x) => (category === "all" || x.category === category) && x.status === "sold"
+      (x) => (category === "all" || x.category === category) && isSoldTabGroup(x.status)
     ).length;
     $("resultCount").textContent =
       "แสดง " +
@@ -108,7 +128,13 @@
           .map((x, idx) => {
             const fallbackImg = FALLBACK_IMAGES[idx % FALLBACK_IMAGES.length];
             const imgSrc = x.image_url ? esc(x.image_url) : fallbackImg;
-            const isSold = x.status === "sold";
+            const stateClass =
+              x.status === "installment"
+                ? "installment"
+                : x.status === "sold"
+                  ? "sold"
+                  : "";
+            const stateText = statusLabel[x.status] || "พร้อมขาย";
             return (
               '<article class="card reveal-on-scroll" style="--reveal-delay: ' +
               (idx % 3) * 85 +
@@ -125,9 +151,9 @@
               '<div class="body">' +
               '<div class="card-meta">' +
               '<span class="state-label ' +
-              (isSold ? "sold" : "") +
+              stateClass +
               '">' +
-              (isSold ? "ขายแล้ว" : "พร้อมขาย") +
+              stateText +
               "</span>" +
               '<span aria-hidden="true">·</span>' +
               "<span>" +
@@ -541,22 +567,39 @@
 
   initCandelabraLoader();
 
+  function applyHeaderTheme(settings) {
+    if (!settings || typeof settings !== "object") return;
+    const bgEl = $("heroBgImg");
+    const nameEl = $("heroShopName");
+    const statusEl = $("shopStatusText");
+    if (bgEl && settings.hero_bg_url) bgEl.src = settings.hero_bg_url;
+    if (nameEl && settings.shop_name) nameEl.textContent = settings.shop_name;
+    if (statusEl && settings.shop_status) statusEl.textContent = settings.shop_status;
+  }
+
   async function init() {
     initScrollReveal();
     initBackToTopButton();
     initCreamyGothicCursor();
 
+    try {
+      const settingsRes = await fetch("/api/site-settings");
+      if (settingsRes.ok) {
+        const settings = await settingsRes.json();
+        applyHeaderTheme(settings);
+      }
+    } catch (_e) {
+      // Ignore
+    }
+
     if (db) {
       try {
         const { data: shopData } = await db
           .from("shop_settings")
-          .select("hero_girl_url")
+          .select("hero_bg_url,shop_name,shop_status")
           .eq("id", "main")
           .maybeSingle();
-        const badgeImg = $("badgeProfileImg");
-        if (badgeImg && shopData && shopData.hero_girl_url) {
-          badgeImg.src = shopData.hero_girl_url;
-        }
+        if (shopData) applyHeaderTheme(shopData);
       } catch (_e) {
         // Ignore
       }
@@ -566,7 +609,7 @@
           .from("accounts")
           .select("id,title,category,status,price,description,image_url,created_at")
           .order("created_at", { ascending: false });
-        rows = !error && Array.isArray(data) ? data : [];
+        rows = !error && Array.isArray(data) ? data.map(normalizeAccountRow) : [];
       } catch (_e) {
         rows = [];
       }
@@ -575,22 +618,10 @@
     }
 
     try {
-      const settingsRes = await fetch("/api/site-settings");
-      if (settingsRes.ok) {
-        const settings = await settingsRes.json();
-        const badgeImg = $("badgeProfileImg");
-        if (badgeImg && settings && settings.hero_girl_url) {
-          badgeImg.src = settings.hero_girl_url;
-        }
-      }
-    } catch (_e) {
-      // Ignore
-    }
-
-    try {
       const res = await fetch("/api/accounts");
       if (res.ok) {
-        rows = await res.json();
+        const list = await res.json();
+        rows = Array.isArray(list) ? list.map(normalizeAccountRow) : [];
       }
     } catch (_e) {
       rows = [];

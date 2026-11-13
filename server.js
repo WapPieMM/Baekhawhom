@@ -145,11 +145,12 @@ app.post('/api/accounts', (req, res) => {
     const body = req.body || {};
     const imageUrl = body.image_url ? saveDataUrlToFile(body.image_url, 'account') : '';
     const nextId = list.reduce((max, item) => Math.max(max, Number(item.id) || 0), 0) + 1;
+    const validStatus = (s) => (s === 'sold' || s === 'installment' ? s : 'available');
     const newItem = {
       id: nextId,
       title: String(body.title || 'ไอดีใหม่').trim(),
       category: body.category === 'chicken_skin' ? 'chicken_skin' : 'normal',
-      status: body.status === 'sold' ? 'sold' : 'available',
+      status: validStatus(body.status),
       price: Number(body.price || 0),
       description: String(body.description || '').trim(),
       image_url: imageUrl || settings.card_1_url,
@@ -171,12 +172,13 @@ app.put('/api/accounts/:id', (req, res) => {
     const idx = list.findIndex((item) => String(item.id) === targetId);
     const body = req.body || {};
     const imageUrl = body.image_url ? saveDataUrlToFile(body.image_url, 'account') : '';
+    const validStatus = (s) => (s === 'sold' || s === 'installment' ? s : 'available');
     if (idx === -1) {
       const created = {
         id: Number(targetId) || Date.now(),
         title: String(body.title || 'ไอดี').trim(),
         category: body.category === 'chicken_skin' ? 'chicken_skin' : 'normal',
-        status: body.status === 'sold' ? 'sold' : 'available',
+        status: validStatus(body.status),
         price: Number(body.price || 0),
         description: String(body.description || '').trim(),
         image_url: imageUrl || settings.card_1_url,
@@ -190,7 +192,7 @@ app.put('/api/accounts/:id', (req, res) => {
       ...list[idx],
       title: body.title !== undefined ? String(body.title).trim() : list[idx].title,
       category: body.category || list[idx].category,
-      status: body.status || list[idx].status,
+      status: body.status ? validStatus(body.status) : list[idx].status,
       price: body.price !== undefined ? Number(body.price) : list[idx].price,
       description: body.description !== undefined ? String(body.description).trim() : list[idx].description,
       image_url: imageUrl || list[idx].image_url,

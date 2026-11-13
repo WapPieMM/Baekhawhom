@@ -20,7 +20,20 @@
   let isSupabaseAdmin = false;
 
   const categoryName = { chicken_skin: "ไอดีไก่สกิน", normal: "ไอดีปกติ" };
-  const statusName = { available: "พร้อมขาย", sold: "ขายแล้ว" };
+  const statusName = { available: "พร้อมขาย", installment: "ติดผ่อน", sold: "ขายแล้ว" };
+  const INSTALLMENT_TAG_RE = /\s*\[status:installment\]\s*$/;
+
+  function normalizeAccountRow(row) {
+    if (!row || typeof row !== "object") return row;
+    const rawDesc = String(row.description || "");
+    const hasTag = INSTALLMENT_TAG_RE.test(rawDesc);
+    return {
+      ...row,
+      status: hasTag ? "installment" : row.status,
+      description: rawDesc.replace(INSTALLMENT_TAG_RE, "")
+    };
+  }
+
   const esc = (s) =>
     String(s ?? "").replace(/[&<>"']/g, (c) =>
       ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c])
@@ -332,9 +345,24 @@
 
     try {
       if (!db || !isSupabaseAdmin) throw new Error("กรุณาเข้าสู่ระบบด้วยบัญชี Admin ก่อนบันทึก");
-      const result = id
-        ? await db.from("accounts").update(payload).eq("id", id)
-        : await db.from("accounts").insert(payload);
+      const cleanDesc = payload.description.replace(INSTALLMENT_TAG_RE, "");
+      const primaryPayload = { ...payload, description: cleanDesc };
+      let result = id
+        ? await db.from("accounts").update(primaryPayload).eq("id", id)
+        : await db.from("accounts").insert(primaryPayload);
+
+      // Fallback if remote Supabase table still has the legacy check (status in ('available','sold'))
+      if (result.error && payload.status === "installment") {
+        const fallbackPayload = {
+          ...primaryPayload,
+          status: "sold",
+          description: cleanDesc ? cleanDesc + "\n[status:installment]" : "[status:installment]"
+        };
+        result = id
+          ? await db.from("accounts").update(fallbackPayload).eq("id", id)
+          : await db.from("accounts").insert(fallbackPayload);
+      }
+
       if (result.error) throw result.error;
 
       message("formMessage", "บันทึกรายการไอดีเรียบร้อย ♡");
@@ -368,9 +396,12 @@
       }
     }
 
+    rows = rows.map(normalizeAccountRow);
     $("totalCount").textContent = rows.length;
     $("availableCount").textContent = rows.filter((x) => x.status === "available").length;
-    $("soldCount").textContent = rows.filter((x) => x.status === "sold").length;
+    $("soldCount").textContent = rows.filter(
+      (x) => x.status === "sold" || x.status === "installment"
+    ).length;
     renderAccounts();
   }
 

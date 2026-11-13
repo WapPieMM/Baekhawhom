@@ -363,7 +363,7 @@
           leftSkewY +
           "deg) scaleX(" +
           scaleX +
-          ") translateZ(0)";
+          ")";
 
         inst.rightWing.style.transform =
           "perspective(950px) rotateY(" +
@@ -374,7 +374,7 @@
           rightSkewY +
           "deg) scaleX(" +
           scaleX +
-          ") translateZ(0)";
+          ")";
       }
 
       requestAnimationFrame(step);
@@ -659,6 +659,9 @@
   let allAccounts = [];
   let startIndex = 0;
   let cardFallbacks = [...DEFAULT_CARDS];
+  const mobileCarouselMedia = window.matchMedia
+    ? window.matchMedia("(max-width: 680px)")
+    : null;
 
   function renderCarousel() {
     const featuredArea = document.getElementById("accounts");
@@ -676,8 +679,9 @@
     if (featuredArea) featuredArea.hidden = false;
     if (showcaseGrid) showcaseGrid.classList.remove("single-col-contact");
 
+    const perSlide = mobileCarouselMedia && mobileCarouselMedia.matches ? 2 : 3;
     const visible = [];
-    const count = Math.min(3, allAccounts.length);
+    const count = Math.min(perSlide, allAccounts.length);
     for (let i = 0; i < count; i++) {
       const idx = (startIndex + i) % allAccounts.length;
       visible.push({ item: allAccounts[idx], idx });
@@ -699,7 +703,6 @@
           cardPos * 85 +
           'ms">' +
           '<span class="card-crown-badge" aria-hidden="true">♛</span>' +
-          '<img class="portrait-card-vine" src="/assets/images/theme/rose_vine_climber.png" alt="" aria-hidden="true">' +
           '<div class="portrait-frame">' +
           '<img src="' +
           imgSrc +
@@ -752,6 +755,14 @@
       startIndex = (startIndex + 1) % allAccounts.length;
       renderCarousel();
     });
+  }
+
+  if (mobileCarouselMedia) {
+    if (typeof mobileCarouselMedia.addEventListener === "function") {
+      mobileCarouselMedia.addEventListener("change", renderCarousel);
+    } else if (typeof mobileCarouselMedia.addListener === "function") {
+      mobileCarouselMedia.addListener(renderCarousel);
+    }
   }
 
   function applyThemeSettings(settings) {
@@ -846,7 +857,9 @@
 
     if (!hasSupabase) {
       if (serverSettings && Array.isArray(serverSettings.featured_accounts)) {
-        allAccounts = serverSettings.featured_accounts.filter((x) => x.status !== "sold");
+        allAccounts = serverSettings.featured_accounts.filter(
+          (x) => (x.status || "available") === "available"
+        );
       } else {
         allAccounts = [];
       }

@@ -254,17 +254,17 @@ textarea {
   position: absolute;
   inset: 0;
   z-index: 1;
-  clip-path: polygon(59.9% 59.5%, 56.9% 63.0%, 54.0% 66.2%, 50.0% 74.0%, 46.1% 66.2%, 43.1% 63.0%, 40.1% 59.5%, 37.3% 55.2%, 34.9% 50.2%, 32.9% 44.3%, 31.8% 36.8%, 32.7% 28.5%, 35.8% 24.3%, 39.2% 22.8%, 42.9% 22.7%, 46.7% 24.5%, 50.0% 29.7%, 53.3% 24.5%, 57.1% 22.7%, 60.8% 22.8%, 64.2% 24.3%, 67.3% 28.5%, 68.2% 36.8%, 67.1% 44.3%, 65.1% 50.2%, 62.7% 55.2%);
-  -webkit-clip-path: polygon(59.9% 59.5%, 56.9% 63.0%, 54.0% 66.2%, 50.0% 74.0%, 46.1% 66.2%, 43.1% 63.0%, 40.1% 59.5%, 37.3% 55.2%, 34.9% 50.2%, 32.9% 44.3%, 31.8% 36.8%, 32.7% 28.5%, 35.8% 24.3%, 39.2% 22.8%, 42.9% 22.7%, 46.7% 24.5%, 50.0% 29.7%, 53.3% 24.5%, 57.1% 22.7%, 60.8% 22.8%, 64.2% 24.3%, 67.3% 28.5%, 68.2% 36.8%, 67.1% 44.3%, 65.1% 50.2%, 62.7% 55.2%);
+  clip-path: ellipse(16.5% 24.8% at 50% 45.2%);
+  -webkit-clip-path: ellipse(16.5% 24.8% at 50% 45.2%);
   overflow: hidden;
 }
 
 .winged-profile-photo-clip img {
   position: absolute;
-  left: 28.5%;
-  top: 21%;
-  width: 43%;
-  height: 58%;
+  left: 33%;
+  top: 19.5%;
+  width: 34%;
+  height: 52%;
   object-fit: cover;
   object-position: center 22%;
   display: block;
@@ -467,10 +467,55 @@ textarea {
   }
 }
 
-@media (max-width: 520px) {
+@media (max-width: 600px) {
+  .admin-shell {
+    padding: 16px 12px 48px;
+  }
+
+  .admin-head h1 {
+    font-size: 28px;
+  }
+
+  .panel {
+    padding: 16px 14px;
+  }
+
+  .panel-title {
+    flex-wrap: wrap;
+    align-items: center;
+  }
+
   .stats,
   .form-row,
   .account-img-upload-box {
     grid-template-columns: 1fr;
+  }
+
+  .account-img-upload-box img {
+    width: 100%;
+  }
+
+  .filters {
+    flex-direction: column;
+  }
+
+  .account-row {
+    grid-template-columns: 88px minmax(0, 1fr);
+    gap: 10px;
+  }
+
+  .account-row img {
+    width: 88px;
+  }
+
+  .row-actions {
+    grid-column: 1 / -1;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+
+  .login-actions .button,
+  .form-actions .button {
+    width: 100%;
   }
 }
