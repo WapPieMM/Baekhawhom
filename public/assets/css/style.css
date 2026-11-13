@@ -782,9 +782,11 @@ div:nth-of-type(2) > main:nth-of-type(1) > section#home:nth-of-type(1),
   box-shadow: 0 2px 6px rgba(32, 30, 42, 0.14);
 }
 
-.channel-badge.ig svg {
-  width: 16px;
-  height: 16px;
+.channel-badge.ig svg,
+.channel-badge.tw svg,
+.channel-badge.dc svg {
+  width: 15px;
+  height: 15px;
 }
 
 .channel-badge.fb {

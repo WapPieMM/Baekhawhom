@@ -226,8 +226,21 @@
         if (data.hero_bg_url && $("previewHeroBg")) $("previewHeroBg").src = data.hero_bg_url;
       }
 
+      const contactKeys = [
+        "line_url",
+        "line_text",
+        "instagram_url",
+        "instagram_text",
+        "facebook_url",
+        "facebook_text",
+        "twitter_url",
+        "twitter_text",
+        "discord_url",
+        "discord_text"
+      ];
+
       if (contactForm) {
-        ["line_url", "line_text", "instagram_url", "instagram_text", "facebook_url", "facebook_text"].forEach((k) => {
+        contactKeys.forEach((k) => {
           if (contactForm.elements[k]) contactForm.elements[k].value = data[k] ?? "";
         });
       }
@@ -240,15 +253,38 @@
         const { data, error } = await db.from("shop_settings").select("*").eq("id", "main").maybeSingle();
         if (error) throw error;
         if (data) {
-          const contactKeys = ["line_url", "line_text", "instagram_url", "instagram_text", "facebook_url", "facebook_text"];
+          let extraContacts = null;
+          if (typeof data.hero_bunny_url === "string" && data.hero_bunny_url.startsWith("__bkh_extra_contacts__:")) {
+            try {
+              extraContacts = JSON.parse(data.hero_bunny_url.slice("__bkh_extra_contacts__:".length));
+            } catch (_err) {
+              extraContacts = null;
+            }
+          }
+          const contactKeys = [
+            "line_url",
+            "line_text",
+            "instagram_url",
+            "instagram_text",
+            "facebook_url",
+            "facebook_text",
+            "twitter_url",
+            "twitter_text",
+            "discord_url",
+            "discord_text"
+          ];
           contactKeys.forEach((k) => {
-            if (contactForm?.elements[k]) contactForm.elements[k].value = data[k] ?? "";
+            if (!contactForm?.elements[k]) return;
+            if (data[k] != null && data[k] !== "") {
+              contactForm.elements[k].value = data[k];
+            } else if (extraContacts && extraContacts[k] != null) {
+              contactForm.elements[k].value = extraContacts[k];
+            }
           });
-          ["hero_girl_url", "hero_bunny_url", "hero_bg_url", "shop_name", "shop_subtitle", "shop_quote", "shop_status"].forEach((k) => {
+          ["hero_girl_url", "hero_bg_url", "shop_name", "shop_subtitle", "shop_quote", "shop_status"].forEach((k) => {
             if (themeForm?.elements[k] && data[k] != null) themeForm.elements[k].value = data[k];
           });
           if (data.hero_girl_url && $("previewHeroGirl")) $("previewHeroGirl").src = data.hero_girl_url;
-          if (data.hero_bunny_url && $("previewHeroBunny")) $("previewHeroBunny").src = data.hero_bunny_url;
           if (data.hero_bg_url && $("previewHeroBg")) $("previewHeroBg").src = data.hero_bg_url;
         }
       } catch (err) {
@@ -502,16 +538,51 @@
       instagram_url: String(fd.get("instagram_url") || "").trim(),
       instagram_text: String(fd.get("instagram_text") || "").trim(),
       facebook_url: String(fd.get("facebook_url") || "").trim(),
-      facebook_text: String(fd.get("facebook_text") || "").trim()
+      facebook_text: String(fd.get("facebook_text") || "").trim(),
+      twitter_url: String(fd.get("twitter_url") || "").trim(),
+      twitter_text: String(fd.get("twitter_text") || "").trim(),
+      discord_url: String(fd.get("discord_url") || "").trim(),
+      discord_text: String(fd.get("discord_text") || "").trim()
     };
 
     try {
+      await fetch("/api/site-settings", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload)
+      }).catch(() => {});
+
       if (!db || !isSupabaseAdmin) throw new Error("กรุณาเข้าสู่ระบบด้วยบัญชี Admin ก่อนบันทึก");
-      const { error } = await db.from("shop_settings").upsert({
+      let { error } = await db.from("shop_settings").upsert({
         id: "main",
         ...payload,
         updated_at: new Date().toISOString()
       });
+
+      // Fallback if remote Supabase table has not added twitter_*/discord_* columns yet
+      if (error) {
+        const extraJson =
+          "__bkh_extra_contacts__:" +
+          JSON.stringify({
+            twitter_url: payload.twitter_url,
+            twitter_text: payload.twitter_text,
+            discord_url: payload.discord_url,
+            discord_text: payload.discord_text
+          });
+        const fallbackResult = await db.from("shop_settings").upsert({
+          id: "main",
+          line_url: payload.line_url,
+          line_text: payload.line_text,
+          instagram_url: payload.instagram_url,
+          instagram_text: payload.instagram_text,
+          facebook_url: payload.facebook_url,
+          facebook_text: payload.facebook_text,
+          hero_bunny_url: extraJson,
+          updated_at: new Date().toISOString()
+        });
+        error = fallbackResult.error;
+      }
+
       if (error) throw error;
       message("contactMessage", "บันทึกช่องทางติดต่อเรียบร้อยแล้ว ♡");
     } catch (err) {

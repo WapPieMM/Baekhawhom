@@ -39,6 +39,10 @@ const DEFAULT_SETTINGS = {
   instagram_text: 'baekhawhom',
   facebook_url: 'https://www.facebook.com/',
   facebook_text: 'baekhawhom',
+  twitter_url: 'https://x.com/',
+  twitter_text: '@baekhawhom',
+  discord_url: 'https://discord.com/',
+  discord_text: 'baekhawhom',
   featured_accounts: []
 };
 

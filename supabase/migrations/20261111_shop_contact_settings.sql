@@ -43,7 +43,11 @@ alter table public.shop_settings
   add column if not exists shop_name text not null default 'Baekhawhom',
   add column if not exists shop_subtitle text not null default '',
   add column if not exists shop_quote text not null default '',
-  add column if not exists shop_status text not null default 'เปิดให้บริการ';
+  add column if not exists shop_status text not null default 'เปิดให้บริการ',
+  add column if not exists twitter_url text not null default '',
+  add column if not exists twitter_text text not null default '',
+  add column if not exists discord_url text not null default '',
+  add column if not exists discord_text text not null default '';
 
 -- Allow admins to replace an image at the same object path if ever needed.
 drop policy if exists "Admins update account images" on storage.objects;
