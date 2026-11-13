@@ -193,7 +193,7 @@
         message("formMessage", "กำลังอัปโหลดรูปการ์ด...");
         const url = await uploadImageFile(file, "card");
         accountImageUrlInput.value = url;
-        accountFormPreview.src = url;
+        if (accountFormPreview) accountFormPreview.src = url;
         accountImageFile.value = "";
         message("formMessage", "อัปโหลดรูปการ์ดเรียบร้อย");
       } catch (err) {
@@ -204,7 +204,7 @@
 
   if (accountImageUrlInput) {
     accountImageUrlInput.addEventListener("input", () => {
-      if (accountImageUrlInput.value.trim()) {
+      if (accountImageUrlInput.value.trim() && accountFormPreview) {
         accountFormPreview.src = accountImageUrlInput.value.trim();
       }
     });
@@ -221,9 +221,9 @@
         ["hero_girl_url", "hero_bunny_url", "hero_bg_url", "shop_name", "shop_subtitle", "shop_quote", "shop_status"].forEach((k) => {
           if (themeForm.elements[k]) themeForm.elements[k].value = data[k] ?? "";
         });
-        if (data.hero_girl_url) $("previewHeroGirl").src = data.hero_girl_url;
-        if (data.hero_bunny_url) $("previewHeroBunny").src = data.hero_bunny_url;
-        if (data.hero_bg_url) $("previewHeroBg").src = data.hero_bg_url;
+        if (data.hero_girl_url && $("previewHeroGirl")) $("previewHeroGirl").src = data.hero_girl_url;
+        if (data.hero_bunny_url && $("previewHeroBunny")) $("previewHeroBunny").src = data.hero_bunny_url;
+        if (data.hero_bg_url && $("previewHeroBg")) $("previewHeroBg").src = data.hero_bg_url;
       }
 
       if (contactForm) {
@@ -247,9 +247,9 @@
           ["hero_girl_url", "hero_bunny_url", "hero_bg_url", "shop_name", "shop_subtitle", "shop_quote", "shop_status"].forEach((k) => {
             if (themeForm?.elements[k] && data[k] != null) themeForm.elements[k].value = data[k];
           });
-          if (data.hero_girl_url) $("previewHeroGirl").src = data.hero_girl_url;
-          if (data.hero_bunny_url) $("previewHeroBunny").src = data.hero_bunny_url;
-          if (data.hero_bg_url) $("previewHeroBg").src = data.hero_bg_url;
+          if (data.hero_girl_url && $("previewHeroGirl")) $("previewHeroGirl").src = data.hero_girl_url;
+          if (data.hero_bunny_url && $("previewHeroBunny")) $("previewHeroBunny").src = data.hero_bunny_url;
+          if (data.hero_bg_url && $("previewHeroBg")) $("previewHeroBg").src = data.hero_bg_url;
         }
       } catch (err) {
         message("themeMessage", "โหลดค่าจาก Supabase ไม่สำเร็จ: " + err.message, true);
@@ -264,13 +264,17 @@
       const fd = new FormData(themeForm);
       const payload = {
         hero_girl_url: String(fd.get("hero_girl_url") || "").trim(),
-        hero_bunny_url: String(fd.get("hero_bunny_url") || "").trim(),
-        hero_bg_url: String(fd.get("hero_bg_url") || "").trim(),
         shop_name: String(fd.get("shop_name") || "Baekhawhom").trim(),
         shop_subtitle: String(fd.get("shop_subtitle") || "").trim(),
         shop_quote: String(fd.get("shop_quote") || "").trim(),
         shop_status: String(fd.get("shop_status") || "เปิดให้บริการ").trim()
       };
+      if (themeForm.elements.hero_bunny_url) {
+        payload.hero_bunny_url = String(fd.get("hero_bunny_url") || "").trim();
+      }
+      if (themeForm.elements.hero_bg_url) {
+        payload.hero_bg_url = String(fd.get("hero_bg_url") || "").trim();
+      }
 
       try {
         if (!db || !isSupabaseAdmin) throw new Error("กรุณาเข้าสู่ระบบด้วยบัญชี Admin ก่อนบันทึก");

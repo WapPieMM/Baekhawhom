@@ -108,19 +108,24 @@
     const matches = rows.filter(
       (x) =>
         (category === "all" || x.category === category) &&
-        (status === "available" ? x.status === "available" : isSoldTabGroup(x.status))
+        x.status === status
     );
     $("availableCount").textContent = rows.filter(
       (x) => (category === "all" || x.category === category) && x.status === "available"
     ).length;
+    if ($("installmentCount")) {
+      $("installmentCount").textContent = rows.filter(
+        (x) => (category === "all" || x.category === category) && x.status === "installment"
+      ).length;
+    }
     $("soldCount").textContent = rows.filter(
-      (x) => (category === "all" || x.category === category) && isSoldTabGroup(x.status)
+      (x) => (category === "all" || x.category === category) && x.status === "sold"
     ).length;
     $("resultCount").textContent =
       "แสดง " +
       matches.length +
       " รายการ · " +
-      (status === "available" ? "พร้อมขาย" : "ขายแล้ว");
+      (statusLabel[status] || "พร้อมขาย");
 
     const gridEl = $("accountGrid");
     gridEl.innerHTML = matches.length
