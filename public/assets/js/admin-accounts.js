@@ -59,19 +59,41 @@
     if (!db || !isSupabaseAdmin) {
       throw new Error("กรุณาเข้าสู่ระบบด้วยบัญชี Admin ก่อนอัปโหลดรูป");
     }
-    if (!file || !["image/jpeg", "image/png", "image/webp"].includes(file.type)) {
-      throw new Error("รองรับเฉพาะไฟล์ JPG, PNG หรือ WebP");
+    const isGifName = /\.gif$/i.test(String(file?.name || ""));
+    const fileType = file?.type || (isGifName ? "image/gif" : "");
+    if (
+      !file ||
+      !["image/jpeg", "image/png", "image/webp", "image/gif"].includes(fileType)
+    ) {
+      throw new Error("รองรับเฉพาะไฟล์ JPG, PNG, WebP หรือ GIF");
     }
-    if (file.size > 5 * 1024 * 1024) {
-      throw new Error("รูปภาพต้องมีขนาดไม่เกิน 5 MB");
+    if (file.size > 10 * 1024 * 1024) {
+      throw new Error("รูปภาพต้องมีขนาดไม่เกิน 10 MB");
     }
     const safeName = String(file.name || "image").replace(/[^a-zA-Z0-9._-]/g, "_");
     const path = prefix + "/" + Date.now() + "-" + crypto.randomUUID() + "-" + safeName;
-    const { data, error } = await db.storage.from("account-images").upload(path, file, {
+    let { data, error } = await db.storage.from("account-images").upload(path, file, {
       cacheControl: "3600",
-      contentType: file.type,
+      contentType: fileType,
       upsert: false
     });
+
+    // Fallback if remote Supabase storage bucket has not yet added image/gif to allowed_mime_types
+    if (error && fileType === "image/gif") {
+      const retryBlob = new Blob([file], { type: "image/webp" });
+      const retryRes = await db.storage.from("account-images").upload(path, retryBlob, {
+        cacheControl: "3600",
+        contentType: "image/webp",
+        upsert: false
+      });
+      if (!retryRes.error && retryRes.data) {
+        data = retryRes.data;
+        error = null;
+      } else if (file.size <= 4 * 1024 * 1024) {
+        return await readFileAsDataUrl(file);
+      }
+    }
+
     if (error) throw new Error("อัปโหลดรูปไม่สำเร็จ: " + error.message);
     const { data: publicData } = db.storage.from("account-images").getPublicUrl(data.path);
     if (!publicData?.publicUrl) throw new Error("สร้าง URL รูปภาพไม่สำเร็จ");
@@ -87,13 +109,8 @@
   }
 
   async function verifySession() {
-    // Allow quick access or check existing session
-    if (sessionStorage.getItem("bkh_quick_admin") === "1") {
-      showAdmin();
-      return;
-    }
+    sessionStorage.removeItem("bkh_quick_admin");
     if (!db) {
-      showAdmin();
       return;
     }
     try {
@@ -113,18 +130,10 @@
     }
   }
 
-  if ($("quickAccessBtn")) {
-    $("quickAccessBtn").addEventListener("click", () => {
-      sessionStorage.setItem("bkh_quick_admin", "1");
-      showAdmin();
-    });
-  }
-
   $("loginForm").addEventListener("submit", async (e) => {
     e.preventDefault();
     if (!db) {
-      sessionStorage.setItem("bkh_quick_admin", "1");
-      return showAdmin();
+      return message("loginMessage", "ยังไม่ได้ตั้งค่าการเชื่อมต่อฐานข้อมูล Supabase", true);
     }
     const fd = new FormData(e.currentTarget);
     const { data, error } = await db.auth.signInWithPassword({
@@ -210,6 +219,39 @@
     });
   }
 
+  const STATUS_DOT_TAG_RE = /\s*\[dot:(#[0-9a-fA-F]{6})\]\s*$/;
+  const shopStatusColorInput = $("shopStatusColorInput");
+  const shopStatusColorHex = $("shopStatusColorHex");
+
+  function setStatusColorControl(color) {
+    const valid = /^#[0-9a-fA-F]{6}$/.test(String(color || "").trim())
+      ? String(color).trim().toLowerCase()
+      : "#3d3b46";
+    if (shopStatusColorInput) shopStatusColorInput.value = valid;
+    if (shopStatusColorHex) shopStatusColorHex.textContent = valid;
+  }
+
+  if (shopStatusColorInput) {
+    shopStatusColorInput.addEventListener("input", () => {
+      setStatusColorControl(shopStatusColorInput.value);
+    });
+  }
+
+  document.querySelectorAll("[data-status-color]").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      setStatusColorControl(btn.getAttribute("data-status-color"));
+    });
+  });
+
+  function unpackStatusAndColor(rawStatus, explicitColor) {
+    const str = String(rawStatus ?? "");
+    const match = str.match(STATUS_DOT_TAG_RE);
+    return {
+      statusText: str.replace(STATUS_DOT_TAG_RE, ""),
+      statusColor: explicitColor || (match ? match[1] : "")
+    };
+  }
+
   // Load Theme & Contact Settings
   async function loadThemeAndContacts() {
     try {
@@ -218,9 +260,14 @@
       const data = await res.json();
 
       if (themeForm) {
-        ["hero_girl_url", "hero_bunny_url", "hero_bg_url", "shop_name", "shop_subtitle", "shop_quote", "shop_status"].forEach((k) => {
+        const parsed = unpackStatusAndColor(data.shop_status, data.shop_status_color);
+        ["hero_girl_url", "hero_bunny_url", "hero_bg_url", "shop_name", "shop_subtitle", "shop_quote"].forEach((k) => {
           if (themeForm.elements[k]) themeForm.elements[k].value = data[k] ?? "";
         });
+        if (themeForm.elements.shop_status) {
+          themeForm.elements.shop_status.value = parsed.statusText;
+        }
+        setStatusColorControl(parsed.statusColor || "#3d3b46");
         if (data.hero_girl_url && $("previewHeroGirl")) $("previewHeroGirl").src = data.hero_girl_url;
         if (data.hero_bunny_url && $("previewHeroBunny")) $("previewHeroBunny").src = data.hero_bunny_url;
         if (data.hero_bg_url && $("previewHeroBg")) $("previewHeroBg").src = data.hero_bg_url;
@@ -281,9 +328,16 @@
               contactForm.elements[k].value = extraContacts[k];
             }
           });
-          ["hero_girl_url", "hero_bg_url", "shop_name", "shop_subtitle", "shop_quote", "shop_status"].forEach((k) => {
+          ["hero_girl_url", "hero_bg_url", "shop_name", "shop_subtitle", "shop_quote"].forEach((k) => {
             if (themeForm?.elements[k] && data[k] != null) themeForm.elements[k].value = data[k];
           });
+          const parsed = unpackStatusAndColor(data.shop_status, data.shop_status_color);
+          if (themeForm?.elements.shop_status && data.shop_status != null) {
+            themeForm.elements.shop_status.value = parsed.statusText;
+          }
+          if (parsed.statusColor) {
+            setStatusColorControl(parsed.statusColor);
+          }
           if (data.hero_girl_url && $("previewHeroGirl")) $("previewHeroGirl").src = data.hero_girl_url;
           if (data.hero_bg_url && $("previewHeroBg")) $("previewHeroBg").src = data.hero_bg_url;
         }
@@ -298,12 +352,19 @@
     themeForm.addEventListener("submit", async (e) => {
       e.preventDefault();
       const fd = new FormData(themeForm);
+      const rawStatus = String(fd.get("shop_status") || "เปิดให้บริการ")
+        .replace(STATUS_DOT_TAG_RE, "")
+        .trim();
+      const rawColor = String(fd.get("shop_status_color") || "#3d3b46").trim();
+      const statusColor = /^#[0-9a-fA-F]{6}$/.test(rawColor) ? rawColor.toLowerCase() : "#3d3b46";
+
       const payload = {
         hero_girl_url: String(fd.get("hero_girl_url") || "").trim(),
         shop_name: String(fd.get("shop_name") || "Baekhawhom").trim(),
         shop_subtitle: String(fd.get("shop_subtitle") || "").trim(),
         shop_quote: String(fd.get("shop_quote") || "").trim(),
-        shop_status: String(fd.get("shop_status") || "เปิดให้บริการ").trim()
+        shop_status: rawStatus,
+        shop_status_color: statusColor
       };
       if (themeForm.elements.hero_bunny_url) {
         payload.hero_bunny_url = String(fd.get("hero_bunny_url") || "").trim();
@@ -313,12 +374,32 @@
       }
 
       try {
+        await fetch("/api/site-settings", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify(payload)
+        }).catch(() => {});
+
         if (!db || !isSupabaseAdmin) throw new Error("กรุณาเข้าสู่ระบบด้วยบัญชี Admin ก่อนบันทึก");
-        const { error } = await db.from("shop_settings").upsert({
+        let { error } = await db.from("shop_settings").upsert({
           id: "main",
           ...payload,
           updated_at: new Date().toISOString()
         });
+
+        // Fallback if remote Supabase table does not have shop_status_color column yet
+        if (error) {
+          const fallbackPayload = { ...payload };
+          delete fallbackPayload.shop_status_color;
+          fallbackPayload.shop_status = rawStatus + " [dot:" + statusColor + "]";
+          const fallbackRes = await db.from("shop_settings").upsert({
+            id: "main",
+            ...fallbackPayload,
+            updated_at: new Date().toISOString()
+          });
+          error = fallbackRes.error;
+        }
+
         if (error) throw error;
         message("themeMessage", "บันทึกรูปภาพและข้อความหน้าแรกเรียบร้อยแล้ว ♡");
       } catch (err) {

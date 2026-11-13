@@ -44,6 +44,7 @@ alter table public.shop_settings
   add column if not exists shop_subtitle text not null default '',
   add column if not exists shop_quote text not null default '',
   add column if not exists shop_status text not null default 'เปิดให้บริการ',
+  add column if not exists shop_status_color text not null default '#3d3b46',
   add column if not exists twitter_url text not null default '',
   add column if not exists twitter_text text not null default '',
   add column if not exists discord_url text not null default '',

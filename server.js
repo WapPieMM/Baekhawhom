@@ -27,6 +27,7 @@ const DEFAULT_SETTINGS = {
   shop_subtitle: 'ROV ✦ ID RENTAL & ACCOUNT SHOP',
   shop_quote: '“บริการดี ซื่อสัตย์ ปลอดภัย ยินดีให้บริการค่ะ ♡”',
   shop_status: 'เปิดให้บริการ',
+  shop_status_color: '#3d3b46',
   hero_girl_url: '/assets/images/theme/hero_girl.jpg',
   hero_bunny_url: '/assets/images/theme/hero_bunny.jpg',
   hero_bg_url: '/assets/aistudio/IMG_0003_034758dd.jpeg',

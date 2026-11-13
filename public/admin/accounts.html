@@ -24,10 +24,10 @@
       <button id="logoutBtn" class="button ghost" type="button" hidden>ออกจากระบบ</button>
     </header>
 
-    <!-- Login Panel (with Quick Access option) -->
+    <!-- Login Panel -->
     <section id="loginPanel" class="panel login-panel">
       <h2>เข้าสู่ระบบผู้ดูแล</h2>
-      <p>เข้าสู่ระบบด้วยบัญชี Admin หรือคลิกปุ่มจัดการหน้าเว็บด่วนด้านล่างเพื่อเปลี่ยนรูปหน้าแรกได้ทันที</p>
+      <p>กรุณาเข้าสู่ระบบด้วยบัญชีผู้ดูแลระบบ (Admin) เพื่อจัดการข้อมูลร้านค้า</p>
       <form id="loginForm">
         <label>อีเมล
           <input name="email" type="email" required autocomplete="username" placeholder="admin@example.com">
@@ -36,8 +36,7 @@
           <input name="password" type="password" required autocomplete="current-password" placeholder="••••••••">
         </label>
         <div class="login-actions">
-          <button class="button" type="submit">เข้าสู่ระบบ Supabase</button>
-          <button class="button secondary" type="button" id="quickAccessBtn">เข้าโหมดจัดการหน้าเว็บทันที ✦</button>
+          <button class="button" type="submit">เข้าสู่ระบบผู้ดูแล</button>
         </div>
         <p class="message" id="loginMessage" role="status"></p>
       </form>
@@ -84,12 +83,12 @@
                 </div>
               </div>
               <div class="slot-controls">
-                <strong>รูปโปรไฟล์ในกรอบหน้าแรก (Profile Picture)</strong>
+                <strong>รูปโปรไฟล์ในกรอบหน้าแรก (Profile Picture · รองรับ GIF)</strong>
                 <label class="file-upload-label">
-                  <span>เลือกรูปโปรไฟล์จากเครื่อง</span>
-                  <input type="file" id="fileHeroGirl" accept="image/png,image/jpeg,image/webp">
+                  <span>เลือกรูปโปรไฟล์จากเครื่อง (JPG, PNG, WebP, GIF)</span>
+                  <input type="file" id="fileHeroGirl" accept="image/png,image/jpeg,image/webp,image/gif,.gif">
                 </label>
-                <label>หรือระบุลิงก์รูปภาพ (URL)
+                <label>หรือระบุลิงก์รูปภาพ / GIF (URL)
                   <input type="text" name="hero_girl_url" placeholder="/assets/images/theme/hero_girl.jpg">
                 </label>
               </div>
@@ -109,6 +108,30 @@
             <label>ป้ายสถานะมุมขวาบน
               <input name="shop_status" maxlength="40" placeholder="เปิดให้บริการ">
             </label>
+          </div>
+
+          <div class="status-color-setting-row">
+            <label for="shopStatusColorInput">สีจุดสถานะมุมขวาบน</label>
+            <div class="status-color-controls">
+              <div class="color-input-pill">
+                <input type="color" id="shopStatusColorInput" name="shop_status_color" value="#3d3b46">
+                <span id="shopStatusColorHex">#3d3b46</span>
+              </div>
+              <div class="status-color-presets" role="group" aria-label="เลือกสีสถานะด่วน">
+                <button type="button" class="color-preset-btn" data-status-color="#2eab57" title="สีเขียว (เปิดให้บริการ)">
+                  <span class="preset-dot" style="background:#2eab57"></span>เขียว (เปิด)
+                </button>
+                <button type="button" class="color-preset-btn" data-status-color="#e09f2d" title="สีเหลือง (คิวงาน/ติดธุระ)">
+                  <span class="preset-dot" style="background:#e09f2d"></span>เหลือง (คิวงาน)
+                </button>
+                <button type="button" class="color-preset-btn" data-status-color="#d64545" title="สีแดง (ปิดให้บริการ)">
+                  <span class="preset-dot" style="background:#d64545"></span>แดง (ปิดพัก)
+                </button>
+                <button type="button" class="color-preset-btn" data-status-color="#3d3b46" title="สีดำโกธิค (ค่าเริ่มต้น)">
+                  <span class="preset-dot" style="background:#3d3b46"></span>ดำ (ต้นฉบับ)
+                </button>
+              </div>
+            </div>
           </div>
 
           <div class="form-actions">
@@ -160,8 +183,8 @@
             <div class="account-img-upload-box">
               <div>
                 <label>อัปโหลดรูปภาพการ์ดไอดี
-                  <input name="image_file" id="accountImageFile" type="file" accept="image/png,image/jpeg,image/webp">
-                  <small>รองรับไฟล์ JPG, PNG หรือ WebP (เปลี่ยนรูปการ์ดได้ทันที)</small>
+                  <input name="image_file" id="accountImageFile" type="file" accept="image/png,image/jpeg,image/webp,image/gif,.gif">
+                  <small>รองรับไฟล์ JPG, PNG, WebP หรือ GIF (เปลี่ยนรูปการ์ดได้ทันที)</small>
                 </label>
                 <label>หรือใส่ลิงก์รูปภาพโดยตรง
                   <input name="image_url" id="accountImageUrlInput" type="text" placeholder="https://...">

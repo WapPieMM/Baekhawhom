@@ -140,11 +140,31 @@
                   ? "sold"
                   : "";
             const stateText = statusLabel[x.status] || "พร้อมขาย";
+            const catText = catName[x.category] || "ไอดีปกติ";
+            const priceFormatted = "฿ " + Number(x.price || 0).toLocaleString("th-TH") + ".-";
+            const descText =
+              x.description || "ไอดีคัดพิเศษ ตรวจสอบความปลอดภัยเรียบร้อย";
+            const previewAttrs =
+              ' data-preview-idx="' +
+              idx +
+              '" data-preview-title="' +
+              esc(x.title) +
+              '" data-preview-meta="' +
+              esc(stateText + " · " + catText) +
+              '" data-preview-price="' +
+              esc(priceFormatted) +
+              '" data-preview-img="' +
+              imgSrc +
+              '" data-preview-desc="' +
+              esc(descText) +
+              '"';
             return (
               '<article class="card reveal-on-scroll" style="--reveal-delay: ' +
               (idx % 3) * 85 +
               'ms">' +
-              '<div class="card-media">' +
+              '<div class="card-media"' +
+              previewAttrs +
+              ">" +
               '<img src="' +
               imgSrc +
               '" alt="' +
@@ -162,22 +182,28 @@
               "</span>" +
               '<span aria-hidden="true">·</span>' +
               "<span>" +
-              (catName[x.category] || "ไอดีปกติ") +
+              catText +
               "</span>" +
               "</div>" +
-              "<h2>" +
+              "<h2" +
+              previewAttrs +
+              ">" +
               esc(x.title) +
               "</h2>" +
               '<p class="description">' +
-              esc(x.description || "ไอดีคัดพิเศษ ตรวจสอบความปลอดภัยเรียบร้อย") +
+              esc(descText) +
               "</p>" +
               '<div class="bottom">' +
-              '<strong class="price">฿ ' +
-              Number(x.price || 0).toLocaleString("th-TH") +
-              ".-</strong>" +
-              '<a class="inquire-link" href="/#contactSection">' +
+              '<strong class="price">' +
+              esc(priceFormatted) +
+              "</strong>" +
+              '<button type="button" class="inquire-link" data-inquire-title="' +
+              esc(x.title) +
+              '" data-inquire-price="' +
+              esc(priceFormatted) +
+              '">' +
               '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>' +
-              "ติดต่อสอบถาม</a>" +
+              "ติดต่อสั่งซื้อ ♡</button>" +
               "</div></div></article>"
             );
           })
@@ -572,6 +598,170 @@
 
   initCandelabraLoader();
 
+  function renderContactPickerChannels(settings) {
+    const contactPickerList = $("contactPickerList");
+    if (!contactPickerList) return;
+    const s = settings || {};
+    const channels = [
+      {
+        key: "line",
+        label: "LINE Official / ID",
+        text: s.line_text || "@baekhawhom",
+        url: s.line_url || "https://line.me/",
+        badgeHtml: '<span class="channel-badge line">LINE</span>'
+      },
+      {
+        key: "ig",
+        label: "Instagram",
+        text: s.instagram_text || "baekhawhom",
+        url: s.instagram_url || "https://www.instagram.com/",
+        badgeHtml:
+          '<span class="channel-badge ig" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><rect width="18" height="18" x="3" y="3" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1"/></svg></span>'
+      },
+      {
+        key: "fb",
+        label: "Facebook",
+        text: s.facebook_text || "baekhawhom",
+        url: s.facebook_url || "https://www.facebook.com/",
+        badgeHtml: '<span class="channel-badge fb">f</span>'
+      },
+      {
+        key: "tw",
+        label: "Twitter (X)",
+        text: s.twitter_text || "@baekhawhom",
+        url: s.twitter_url || "https://x.com/",
+        badgeHtml:
+          '<span class="channel-badge tw" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></span>'
+      },
+      {
+        key: "dc",
+        label: "Discord",
+        text: s.discord_text || "baekhawhom",
+        url: s.discord_url || "https://discord.com/",
+        badgeHtml:
+          '<span class="channel-badge dc" aria-hidden="true"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057a.082.082 0 0 0 .031.057 19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.028zM8.02 15.33c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.956-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.956 2.418-2.157 2.418zm7.975 0c-1.183 0-2.157-1.085-2.157-2.419 0-1.333.955-2.419 2.157-2.419 1.21 0 2.176 1.096 2.157 2.42 0 1.333-.946 2.418-2.157 2.418z"/></svg></span>'
+      }
+    ];
+
+    contactPickerList.innerHTML = channels
+      .map(
+        (ch) =>
+          '<a class="contact-picker-item" href="' +
+          esc(ch.url) +
+          '" target="_blank" rel="noopener noreferrer">' +
+          ch.badgeHtml +
+          '<span class="contact-picker-item-body">' +
+          "<small>" +
+          esc(ch.label) +
+          "</small>" +
+          "<b>" +
+          esc(ch.text) +
+          "</b>" +
+          "</span>" +
+          '<span class="contact-picker-action">ทักแชท ✦</span>' +
+          "</a>"
+      )
+      .join("");
+  }
+
+  function initModals() {
+    const modal = $("accountModal");
+    const modalImage = $("modalImage");
+    const modalMeta = $("modalMeta");
+    const modalTitle = $("modalTitle");
+    const modalDesc = $("modalDesc");
+    const modalPrice = $("modalPrice");
+    const modalCloseBtn = $("modalCloseBtn");
+    const modalContactBtn = $("modalContactBtn");
+
+    const contactPickerModal = $("contactPickerModal");
+    const contactPickerCloseBtn = $("contactPickerCloseBtn");
+    const contactPickerAccount = $("contactPickerAccount");
+
+    renderContactPickerChannels({});
+
+    function openContactPicker(accountTitle, accountPrice) {
+      if (!contactPickerModal) return;
+      if (contactPickerAccount) {
+        if (accountTitle) {
+          contactPickerAccount.textContent =
+            "รายการ: " + accountTitle + (accountPrice ? " · " + accountPrice : "");
+          contactPickerAccount.hidden = false;
+        } else {
+          contactPickerAccount.textContent = "";
+          contactPickerAccount.hidden = true;
+        }
+      }
+      contactPickerModal.hidden = false;
+    }
+
+    if (modalContactBtn) {
+      modalContactBtn.addEventListener("click", () => {
+        const titleText = modalTitle ? modalTitle.textContent : "";
+        const priceText = modalPrice ? modalPrice.textContent : "";
+        openContactPicker(titleText, priceText);
+      });
+    }
+
+    if (contactPickerCloseBtn && contactPickerModal) {
+      contactPickerCloseBtn.addEventListener("click", () => {
+        contactPickerModal.hidden = true;
+      });
+    }
+
+    if (modalCloseBtn && modal) {
+      modalCloseBtn.addEventListener("click", () => {
+        modal.hidden = true;
+      });
+    }
+
+    document.addEventListener("click", (event) => {
+      const inquireBtn = event.target.closest("[data-inquire-title]");
+      if (inquireBtn) {
+        event.preventDefault();
+        openContactPicker(
+          inquireBtn.getAttribute("data-inquire-title") || "",
+          inquireBtn.getAttribute("data-inquire-price") || ""
+        );
+        return;
+      }
+
+      const previewTrigger = event.target.closest("[data-preview-title]");
+      if (previewTrigger && modal) {
+        modalTitle.textContent = previewTrigger.getAttribute("data-preview-title") || "";
+        modalMeta.textContent = previewTrigger.getAttribute("data-preview-meta") || "";
+        modalPrice.textContent = previewTrigger.getAttribute("data-preview-price") || "";
+        modalDesc.textContent = previewTrigger.getAttribute("data-preview-desc") || "";
+        const imgUrl = previewTrigger.getAttribute("data-preview-img") || FALLBACK_IMAGES[0];
+        modalImage.src = imgUrl;
+        modalImage.alt = modalTitle.textContent;
+        modal.hidden = false;
+        return;
+      }
+
+      if (contactPickerModal && !contactPickerModal.hidden && event.target === contactPickerModal) {
+        contactPickerModal.hidden = true;
+        return;
+      }
+
+      if (modal && !modal.hidden && event.target === modal) {
+        modal.hidden = true;
+      }
+    });
+
+    document.addEventListener("keydown", (event) => {
+      if (event.key === "Escape") {
+        if (contactPickerModal && !contactPickerModal.hidden) {
+          contactPickerModal.hidden = true;
+          return;
+        }
+        if (modal && !modal.hidden) {
+          modal.hidden = true;
+        }
+      }
+    });
+  }
+
   function applyHeaderTheme(settings) {
     if (!settings || typeof settings !== "object") return;
     const bgEl = $("heroBgImg");
@@ -579,19 +769,37 @@
     const statusEl = $("shopStatusText");
     if (bgEl && settings.hero_bg_url) bgEl.src = settings.hero_bg_url;
     if (nameEl && settings.shop_name) nameEl.textContent = settings.shop_name;
-    if (statusEl && settings.shop_status) statusEl.textContent = settings.shop_status;
+
+    const dotTagRe = /\s*\[dot:(#[0-9a-fA-F]{6})\]\s*$/;
+    const rawStatusStr = String(settings.shop_status || "");
+    const dotMatch = rawStatusStr.match(dotTagRe);
+    const cleanStatusText = rawStatusStr.replace(dotTagRe, "");
+    const statusDotColor =
+      settings.shop_status_color || (dotMatch ? dotMatch[1] : "");
+
+    if (statusEl && cleanStatusText) statusEl.textContent = cleanStatusText;
+    if (statusDotColor && /^#[0-9a-fA-F]{6}$/.test(statusDotColor)) {
+      document.querySelectorAll(".status-dot").forEach((dot) => {
+        dot.style.backgroundColor = statusDotColor;
+        dot.style.boxShadow = "0 0 6px " + statusDotColor + "66";
+      });
+    }
+
+    renderContactPickerChannels(settings);
   }
 
   async function init() {
     initScrollReveal();
     initBackToTopButton();
     initCreamyGothicCursor();
+    initModals();
 
+    let serverSettings = null;
     try {
       const settingsRes = await fetch("/api/site-settings");
       if (settingsRes.ok) {
-        const settings = await settingsRes.json();
-        applyHeaderTheme(settings);
+        serverSettings = await settingsRes.json();
+        applyHeaderTheme(serverSettings);
       }
     } catch (_e) {
       // Ignore
@@ -601,10 +809,52 @@
       try {
         const { data: shopData } = await db
           .from("shop_settings")
-          .select("hero_bg_url,shop_name,shop_status")
+          .select("*")
           .eq("id", "main")
           .maybeSingle();
-        if (shopData) applyHeaderTheme(shopData);
+        if (shopData) {
+          const merged = { ...(serverSettings || {}) };
+          if (
+            typeof shopData.hero_bunny_url === "string" &&
+            shopData.hero_bunny_url.startsWith("__bkh_extra_contacts__:")
+          ) {
+            try {
+              const extra = JSON.parse(
+                shopData.hero_bunny_url.slice("__bkh_extra_contacts__:".length)
+              );
+              if (extra && typeof extra === "object") {
+                if (extra.twitter_url) merged.twitter_url = extra.twitter_url;
+                if (extra.twitter_text) merged.twitter_text = extra.twitter_text;
+                if (extra.discord_url) merged.discord_url = extra.discord_url;
+                if (extra.discord_text) merged.discord_text = extra.discord_text;
+              }
+            } catch (_err) {
+              // Ignore malformed JSON
+            }
+          }
+          [
+            "line_url",
+            "line_text",
+            "instagram_url",
+            "instagram_text",
+            "facebook_url",
+            "facebook_text",
+            "twitter_url",
+            "twitter_text",
+            "discord_url",
+            "discord_text",
+            "hero_girl_url",
+            "hero_bg_url",
+            "shop_name",
+            "shop_subtitle",
+            "shop_quote",
+            "shop_status",
+            "shop_status_color"
+          ].forEach((key) => {
+            if (shopData[key]) merged[key] = shopData[key];
+          });
+          applyHeaderTheme(merged);
+        }
       } catch (_e) {
         // Ignore
       }
