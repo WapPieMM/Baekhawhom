@@ -90,7 +90,7 @@ function saveDataUrlToFile(dataUrl, prefix = 'img') {
   return `/uploads/${filename}`;
 }
 
-app.use(express.json({ limit: '15mb' }));
+app.use(express.json({ limit: '25mb' }));
 app.use('/src/assets', express.static(srcAssets));
 
 app.get('/api/site-settings', (_req, res) => {

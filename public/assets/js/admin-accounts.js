@@ -55,6 +55,47 @@
     });
   }
 
+  function compressLargeImageForStorage(file, maxDim = 2560, quality = 0.88) {
+    return new Promise((resolve, reject) => {
+      const url = URL.createObjectURL(file);
+      const img = new Image();
+      img.onload = () => {
+        URL.revokeObjectURL(url);
+        let { width, height } = img;
+        if (width > maxDim || height > maxDim) {
+          const ratio = Math.min(maxDim / width, maxDim / height);
+          width = Math.round(width * ratio);
+          height = Math.round(height * ratio);
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("ไม่สามารถประมวลผลรูปภาพได้"));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("บีบอัดรูปภาพไม่สำเร็จ"));
+              return;
+            }
+            resolve(blob);
+          },
+          "image/webp",
+          quality
+        );
+      };
+      img.onerror = () => {
+        URL.revokeObjectURL(url);
+        reject(new Error("ไม่สามารถอ่านไฟล์รูปภาพได้"));
+      };
+      img.src = url;
+    });
+  }
+
   async function uploadImageFile(file, prefix = "upload") {
     if (!db || !isSupabaseAdmin) {
       throw new Error("กรุณาเข้าสู่ระบบด้วยบัญชี Admin ก่อนอัปโหลดรูป");
@@ -67,8 +108,9 @@
     ) {
       throw new Error("รองรับเฉพาะไฟล์ JPG, PNG, WebP หรือ GIF");
     }
-    if (file.size > 10 * 1024 * 1024) {
-      throw new Error("รูปภาพต้องมีขนาดไม่เกิน 10 MB");
+    const MAX_UPLOAD_MB = 15;
+    if (file.size > MAX_UPLOAD_MB * 1024 * 1024) {
+      throw new Error("รูปภาพต้องมีขนาดไม่เกิน " + MAX_UPLOAD_MB + " MB");
     }
     const safeName = String(file.name || "image").replace(/[^a-zA-Z0-9._-]/g, "_");
     const path = prefix + "/" + Date.now() + "-" + crypto.randomUUID() + "-" + safeName;
@@ -91,6 +133,30 @@
         error = null;
       } else if (file.size <= 4 * 1024 * 1024) {
         return await readFileAsDataUrl(file);
+      }
+    }
+
+    // Fallback if remote Supabase storage bucket still enforces legacy 5MB limit on 5-15MB images
+    if (error && fileType !== "image/gif") {
+      try {
+        let compressedBlob = await compressLargeImageForStorage(file, 2560, 0.86);
+        if (compressedBlob.size > 4.6 * 1024 * 1024) {
+          compressedBlob = await compressLargeImageForStorage(file, 2048, 0.78);
+        }
+        const webpPath = path.replace(/\.[a-zA-Z0-9]+$/, "") + ".webp";
+        const retryRes = await db.storage
+          .from("account-images")
+          .upload(webpPath, compressedBlob, {
+            cacheControl: "3600",
+            contentType: "image/webp",
+            upsert: false
+          });
+        if (!retryRes.error && retryRes.data) {
+          data = retryRes.data;
+          error = null;
+        }
+      } catch (_compressErr) {
+        // Keep original error if compression fails
       }
     }
 
