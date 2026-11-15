@@ -952,7 +952,6 @@ div:nth-of-type(2) > main:nth-of-type(1) > section#home:nth-of-type(1),
 
 .portrait-frame {
   width: 100%;
-  aspect-ratio: 16 / 9;
   border-radius: 10px;
   overflow: hidden;
   border: 1px solid #ccccd8;
@@ -963,15 +962,10 @@ div:nth-of-type(2) > main:nth-of-type(1) > section#home:nth-of-type(1),
 
 .portrait-frame img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  object-fit: contain;
   display: block;
   filter: contrast(101%);
-  transition: transform 300ms var(--ease-out);
-}
-
-.portrait-card:hover .portrait-frame img {
-  transform: scale(1.04);
 }
 
 .portrait-card-info {
@@ -1073,7 +1067,6 @@ div:nth-of-type(2) > main:nth-of-type(1) > section#home:nth-of-type(1),
 
 .modal-media {
   width: 100%;
-  aspect-ratio: 16 / 9;
   background: var(--beige);
   overflow: hidden;
   border-bottom: 1px solid var(--line);
@@ -1081,8 +1074,8 @@ div:nth-of-type(2) > main:nth-of-type(1) > section#home:nth-of-type(1),
 
 .modal-media img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  object-fit: contain;
   display: block;
 }
 

@@ -548,7 +548,6 @@ main {
 
 .card-media {
   width: 100%;
-  aspect-ratio: 16 / 9;
   border-radius: 11px;
   overflow: hidden;
   background: linear-gradient(140deg, #eeeef4, #c6c6d4);
@@ -557,15 +556,10 @@ main {
 
 .card-media img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  object-fit: contain;
   display: block;
   filter: contrast(102%);
-  transition: transform 300ms var(--ease-out);
-}
-
-.card:hover .card-media img {
-  transform: scale(1.04);
 }
 
 .body {
@@ -703,7 +697,6 @@ main {
 
 .modal-media {
   width: 100%;
-  aspect-ratio: 16 / 9;
   background: #eeeef4;
   overflow: hidden;
   border-bottom: 1px solid var(--line);
@@ -711,8 +704,8 @@ main {
 
 .modal-media img {
   width: 100%;
-  height: 100%;
-  object-fit: cover;
+  height: auto;
+  object-fit: contain;
   display: block;
 }
 

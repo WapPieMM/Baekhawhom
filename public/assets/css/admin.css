@@ -426,9 +426,8 @@ textarea {
 
 .account-img-upload-box img {
   width: 168px;
-  aspect-ratio: 16 / 9;
   height: auto;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 8px;
   border: 1px solid #d0d0dc;
   background: var(--beige);
@@ -474,9 +473,8 @@ textarea {
 
 .account-row img {
   width: 118px;
-  aspect-ratio: 16 / 9;
   height: auto;
-  object-fit: cover;
+  object-fit: contain;
   border-radius: 8px;
   background: var(--beige);
   border: 1px solid var(--line);
