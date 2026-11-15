@@ -890,7 +890,21 @@
     };
 
     setImg("heroGirlImg", settings.hero_girl_url);
-    setImg("contactProfileImg", settings.hero_girl_url);
+    const contactImgEl = document.getElementById("contactProfileImg");
+    const rawContactAvatar = String(settings.contact_avatar_url || "").trim();
+    const isLegacyAiAvatar =
+      rawContactAvatar === "/assets/images/theme/hero_girl.jpg" ||
+      rawContactAvatar === "/src/assets/images/shop_curator_avatar_1794387730456.jpg";
+    const cleanContactAvatar = isLegacyAiAvatar ? "" : rawContactAvatar;
+    if (contactImgEl) {
+      if (cleanContactAvatar) {
+        contactImgEl.src = cleanContactAvatar;
+        contactImgEl.hidden = false;
+      } else {
+        contactImgEl.removeAttribute("src");
+        contactImgEl.hidden = true;
+      }
+    }
     setImg("heroBunnyImg", settings.hero_bunny_url);
     setImg("heroBgImg", settings.hero_bg_url);
 
@@ -898,6 +912,9 @@
     setText("footerShopName", settings.shop_name);
     setText("heroShopSubtitle", settings.shop_subtitle);
     setText("heroShopQuote", settings.shop_quote);
+    setText("contactAvatarLabel", settings.contact_avatar_label);
+    setText("contactBoxTitle", settings.contact_box_title);
+    setText("contactBoxText", settings.contact_box_text);
 
     const dotTagRe = /\s*\[dot:(#[0-9a-fA-F]{6})\]\s*$/;
     const rawStatusStr = String(settings.shop_status || "");
@@ -1054,6 +1071,10 @@
               if (extra.twitter_text) merged.twitter_text = extra.twitter_text;
               if (extra.discord_url) merged.discord_url = extra.discord_url;
               if (extra.discord_text) merged.discord_text = extra.discord_text;
+              if (extra.contact_avatar_url) merged.contact_avatar_url = extra.contact_avatar_url;
+              if (extra.contact_avatar_label) merged.contact_avatar_label = extra.contact_avatar_label;
+              if (extra.contact_box_title) merged.contact_box_title = extra.contact_box_title;
+              if (extra.contact_box_text) merged.contact_box_text = extra.contact_box_text;
             }
           } catch (_err) {
             // Ignore malformed JSON
@@ -1069,7 +1090,19 @@
         if (shopData.twitter_text) merged.twitter_text = shopData.twitter_text;
         if (shopData.discord_url) merged.discord_url = shopData.discord_url;
         if (shopData.discord_text) merged.discord_text = shopData.discord_text;
-        ["hero_girl_url", "hero_bg_url", "shop_name", "shop_subtitle", "shop_quote", "shop_status", "shop_status_color"].forEach((key) => {
+        [
+          "hero_girl_url",
+          "hero_bg_url",
+          "shop_name",
+          "shop_subtitle",
+          "shop_quote",
+          "shop_status",
+          "shop_status_color",
+          "contact_avatar_url",
+          "contact_avatar_label",
+          "contact_box_title",
+          "contact_box_text"
+        ].forEach((key) => {
           if (shopData[key]) merged[key] = shopData[key];
         });
         applyThemeSettings(merged);

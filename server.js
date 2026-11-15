@@ -44,6 +44,11 @@ const DEFAULT_SETTINGS = {
   twitter_text: '@baekhawhom',
   discord_url: 'https://discord.com/',
   discord_text: 'baekhawhom',
+  contact_avatar_url: '',
+  contact_avatar_label: 'baekhawhom',
+  contact_box_title: 'Contact khawhom',
+  contact_box_text:
+    'ช่องทางการติดต่อและเช็คเครดิตข้าวหอม\nติดต่อสอบถามหรือสนใจไอดี\nจิ้มไลน์ได้เลยคับตอบไว\nเช็คเครดิตสามารถจิ้มช่องทางข้างล่าง\nได้เย้ย หน้าร้านหลักอยู่ใน X น้า',
   featured_accounts: []
 };
 
@@ -104,6 +109,7 @@ app.post('/api/site-settings', (req, res) => {
       'hero_girl_url',
       'hero_bunny_url',
       'hero_bg_url',
+      'contact_avatar_url',
       'card_1_url',
       'card_2_url',
       'card_3_url'

@@ -255,6 +255,95 @@
   wireHeroSlotUpload("fileHeroBunny", "hero_bunny_url", "previewHeroBunny", "hero_bunny");
   wireHeroSlotUpload("fileHeroBg", "hero_bg_url", "previewHeroBg", "hero_bg");
 
+  const DEFAULT_CONTACT_BOX_TITLE = "Contact khawhom";
+  const DEFAULT_CONTACT_AVATAR_LABEL = "baekhawhom";
+  const DEFAULT_CONTACT_BOX_TEXT =
+    "ช่องทางการติดต่อและเช็คเครดิตข้าวหอม\nติดต่อสอบถามหรือสนใจไอดี\nจิ้มไลน์ได้เลยคับตอบไว\nเช็คเครดิตสามารถจิ้มช่องทางข้างล่าง\nได้เย้ย หน้าร้านหลักอยู่ใน X น้า";
+  const DEFAULT_CONTACT_AVATAR_URL = "";
+
+  function cleanContactAvatarUrl(url) {
+    const trimmed = String(url || "").trim();
+    if (
+      trimmed === "/assets/images/theme/hero_girl.jpg" ||
+      trimmed === "/src/assets/images/shop_curator_avatar_1794387730456.jpg"
+    ) {
+      return "";
+    }
+    return trimmed;
+  }
+
+  function syncContactLivePreview() {
+    if (!contactForm) return;
+    const getVal = (name, fallback) => {
+      const el = contactForm.elements[name];
+      const v = el ? String(el.value || "").trim() : "";
+      return v || fallback;
+    };
+
+    const avatarUrl = cleanContactAvatarUrl(getVal("contact_avatar_url", DEFAULT_CONTACT_AVATAR_URL));
+    const boxTitle = getVal("contact_box_title", DEFAULT_CONTACT_BOX_TITLE);
+    const avatarLabel = getVal("contact_avatar_label", DEFAULT_CONTACT_AVATAR_LABEL);
+    const rawBoxText = contactForm.elements.contact_box_text
+      ? String(contactForm.elements.contact_box_text.value || "")
+      : "";
+    const boxText = rawBoxText.trim() ? rawBoxText : DEFAULT_CONTACT_BOX_TEXT;
+
+    ["adminThumbContactAvatar", "previewContactAvatarImg"].forEach((id) => {
+      const imgEl = $(id);
+      if (!imgEl) return;
+      if (avatarUrl) {
+        imgEl.src = avatarUrl;
+        imgEl.hidden = false;
+      } else {
+        imgEl.removeAttribute("src");
+        imgEl.hidden = true;
+      }
+    });
+    if ($("previewContactBoxTitle")) $("previewContactBoxTitle").textContent = boxTitle;
+    if ($("previewContactAvatarLabel")) $("previewContactAvatarLabel").textContent = avatarLabel;
+    if ($("previewContactBoxText")) $("previewContactBoxText").textContent = boxText;
+
+    if ($("previewLineText")) $("previewLineText").textContent = getVal("line_text", "@baekhawhom");
+    if ($("previewIgText")) $("previewIgText").textContent = getVal("instagram_text", "baekhawhom");
+    if ($("previewFbText")) $("previewFbText").textContent = getVal("facebook_text", "baekhawhom");
+    if ($("previewTwText")) $("previewTwText").textContent = getVal("twitter_text", "@baekhawhom");
+    if ($("previewDcText")) $("previewDcText").textContent = getVal("discord_text", "baekhawhom");
+  }
+
+  const fileContactAvatar = $("fileContactAvatar");
+  const contactAvatarUrlInput = $("contactAvatarUrlInput");
+
+  if (fileContactAvatar) {
+    fileContactAvatar.addEventListener("change", async () => {
+      const file = fileContactAvatar.files?.[0];
+      if (!file) return;
+      const tempPreviewUrl = URL.createObjectURL(file);
+      ["adminThumbContactAvatar", "previewContactAvatarImg"].forEach((id) => {
+        const imgEl = $(id);
+        if (imgEl) {
+          imgEl.src = tempPreviewUrl;
+          imgEl.hidden = false;
+        }
+      });
+      try {
+        message("contactMessage", "กำลังอัปโหลดรูปวงกลม...");
+        const uploadedUrl = await uploadImageFile(file, "contact_avatar");
+        if (contactAvatarUrlInput) contactAvatarUrlInput.value = uploadedUrl;
+        syncContactLivePreview();
+        fileContactAvatar.value = "";
+        message("contactMessage", "อัปโหลดรูปวงกลมเรียบร้อย กดปุ่มบันทึกด้านล่างเพื่อใช้งาน ♡");
+      } catch (err) {
+        message("contactMessage", err.message || "อัปโหลดรูปวงกลมไม่สำเร็จ", true);
+      } finally {
+        URL.revokeObjectURL(tempPreviewUrl);
+      }
+    });
+  }
+
+  if (contactForm) {
+    contactForm.addEventListener("input", syncContactLivePreview);
+  }
+
   // Account card image preview
   const accountImageFile = $("accountImageFile");
   const accountImageUrlInput = $("accountImageUrlInput");
@@ -320,42 +409,51 @@
 
   // Load Theme & Contact Settings
   async function loadThemeAndContacts() {
+    const contactKeys = [
+      "line_url",
+      "line_text",
+      "instagram_url",
+      "instagram_text",
+      "facebook_url",
+      "facebook_text",
+      "twitter_url",
+      "twitter_text",
+      "discord_url",
+      "discord_text",
+      "contact_avatar_url",
+      "contact_avatar_label",
+      "contact_box_title",
+      "contact_box_text"
+    ];
+
     try {
       const res = await fetch("/api/site-settings");
-      if (!res.ok) return;
-      const data = await res.json();
+      if (res.ok) {
+        const data = await res.json();
 
-      if (themeForm) {
-        const parsed = unpackStatusAndColor(data.shop_status, data.shop_status_color);
-        ["hero_girl_url", "hero_bunny_url", "hero_bg_url", "shop_name", "shop_subtitle", "shop_quote"].forEach((k) => {
-          if (themeForm.elements[k]) themeForm.elements[k].value = data[k] ?? "";
-        });
-        if (themeForm.elements.shop_status) {
-          themeForm.elements.shop_status.value = parsed.statusText;
+        if (themeForm) {
+          const parsed = unpackStatusAndColor(data.shop_status, data.shop_status_color);
+          ["hero_girl_url", "hero_bunny_url", "hero_bg_url", "shop_name", "shop_subtitle", "shop_quote"].forEach((k) => {
+            if (themeForm.elements[k]) themeForm.elements[k].value = data[k] ?? "";
+          });
+          if (themeForm.elements.shop_status) {
+            themeForm.elements.shop_status.value = parsed.statusText;
+          }
+          setStatusColorControl(parsed.statusColor || "#3d3b46");
+          if (data.hero_girl_url && $("previewHeroGirl")) $("previewHeroGirl").src = data.hero_girl_url;
+          if (data.hero_bunny_url && $("previewHeroBunny")) $("previewHeroBunny").src = data.hero_bunny_url;
+          if (data.hero_bg_url && $("previewHeroBg")) $("previewHeroBg").src = data.hero_bg_url;
         }
-        setStatusColorControl(parsed.statusColor || "#3d3b46");
-        if (data.hero_girl_url && $("previewHeroGirl")) $("previewHeroGirl").src = data.hero_girl_url;
-        if (data.hero_bunny_url && $("previewHeroBunny")) $("previewHeroBunny").src = data.hero_bunny_url;
-        if (data.hero_bg_url && $("previewHeroBg")) $("previewHeroBg").src = data.hero_bg_url;
-      }
 
-      const contactKeys = [
-        "line_url",
-        "line_text",
-        "instagram_url",
-        "instagram_text",
-        "facebook_url",
-        "facebook_text",
-        "twitter_url",
-        "twitter_text",
-        "discord_url",
-        "discord_text"
-      ];
-
-      if (contactForm) {
-        contactKeys.forEach((k) => {
-          if (contactForm.elements[k]) contactForm.elements[k].value = data[k] ?? "";
-        });
+        if (contactForm) {
+          contactKeys.forEach((k) => {
+            if (contactForm.elements[k]) {
+              const val = k === "contact_avatar_url" ? cleanContactAvatarUrl(data[k]) : (data[k] ?? "");
+              contactForm.elements[k].value = val;
+            }
+          });
+          syncContactLivePreview();
+        }
       }
     } catch (_e) {
       // Ignore
@@ -374,26 +472,18 @@
               extraContacts = null;
             }
           }
-          const contactKeys = [
-            "line_url",
-            "line_text",
-            "instagram_url",
-            "instagram_text",
-            "facebook_url",
-            "facebook_text",
-            "twitter_url",
-            "twitter_text",
-            "discord_url",
-            "discord_text"
-          ];
           contactKeys.forEach((k) => {
             if (!contactForm?.elements[k]) return;
             if (data[k] != null && data[k] !== "") {
-              contactForm.elements[k].value = data[k];
-            } else if (extraContacts && extraContacts[k] != null) {
-              contactForm.elements[k].value = extraContacts[k];
+              contactForm.elements[k].value =
+                k === "contact_avatar_url" ? cleanContactAvatarUrl(data[k]) : data[k];
+            } else if (extraContacts && extraContacts[k] != null && extraContacts[k] !== "") {
+              contactForm.elements[k].value =
+                k === "contact_avatar_url" ? cleanContactAvatarUrl(extraContacts[k]) : extraContacts[k];
             }
           });
+          syncContactLivePreview();
+
           ["hero_girl_url", "hero_bg_url", "shop_name", "shop_subtitle", "shop_quote"].forEach((k) => {
             if (themeForm?.elements[k] && data[k] != null) themeForm.elements[k].value = data[k];
           });
@@ -675,7 +765,7 @@
   $("statusFilter").addEventListener("change", renderAccounts);
   $("refreshBtn").addEventListener("click", loadAccounts);
 
-  // Save Contact Channels
+  // Save Contact Channels & Contact Card Header
   contactForm.addEventListener("submit", async (e) => {
     e.preventDefault();
     const fd = new FormData(contactForm);
@@ -689,7 +779,15 @@
       twitter_url: String(fd.get("twitter_url") || "").trim(),
       twitter_text: String(fd.get("twitter_text") || "").trim(),
       discord_url: String(fd.get("discord_url") || "").trim(),
-      discord_text: String(fd.get("discord_text") || "").trim()
+      discord_text: String(fd.get("discord_text") || "").trim(),
+      contact_avatar_url:
+        String(fd.get("contact_avatar_url") || "").trim() || DEFAULT_CONTACT_AVATAR_URL,
+      contact_avatar_label:
+        String(fd.get("contact_avatar_label") || "").trim() || DEFAULT_CONTACT_AVATAR_LABEL,
+      contact_box_title:
+        String(fd.get("contact_box_title") || "").trim() || DEFAULT_CONTACT_BOX_TITLE,
+      contact_box_text:
+        String(fd.get("contact_box_text") || "").trim() || DEFAULT_CONTACT_BOX_TEXT
     };
 
     try {
@@ -700,22 +798,28 @@
       }).catch(() => {});
 
       if (!db || !isSupabaseAdmin) throw new Error("กรุณาเข้าสู่ระบบด้วยบัญชี Admin ก่อนบันทึก");
+      const extraJson =
+        "__bkh_extra_contacts__:" +
+        JSON.stringify({
+          twitter_url: payload.twitter_url,
+          twitter_text: payload.twitter_text,
+          discord_url: payload.discord_url,
+          discord_text: payload.discord_text,
+          contact_avatar_url: payload.contact_avatar_url,
+          contact_avatar_label: payload.contact_avatar_label,
+          contact_box_title: payload.contact_box_title,
+          contact_box_text: payload.contact_box_text
+        });
+
       let { error } = await db.from("shop_settings").upsert({
         id: "main",
         ...payload,
+        hero_bunny_url: extraJson,
         updated_at: new Date().toISOString()
       });
 
-      // Fallback if remote Supabase table has not added twitter_*/discord_* columns yet
+      // Fallback if remote Supabase table has not added contact_avatar_*/contact_box_* or twitter_*/discord_* columns yet
       if (error) {
-        const extraJson =
-          "__bkh_extra_contacts__:" +
-          JSON.stringify({
-            twitter_url: payload.twitter_url,
-            twitter_text: payload.twitter_text,
-            discord_url: payload.discord_url,
-            discord_text: payload.discord_text
-          });
         const fallbackResult = await db.from("shop_settings").upsert({
           id: "main",
           line_url: payload.line_url,
@@ -731,7 +835,8 @@
       }
 
       if (error) throw error;
-      message("contactMessage", "บันทึกช่องทางติดต่อเรียบร้อยแล้ว ♡");
+      syncContactLivePreview();
+      message("contactMessage", "บันทึกการ์ดติดต่อและช่องทางติดต่อเรียบร้อยแล้ว ♡");
     } catch (err) {
       message("contactMessage", err.message || "เกิดข้อผิดพลาด", true);
     }

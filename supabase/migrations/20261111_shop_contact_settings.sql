@@ -48,7 +48,11 @@ alter table public.shop_settings
   add column if not exists twitter_url text not null default '',
   add column if not exists twitter_text text not null default '',
   add column if not exists discord_url text not null default '',
-  add column if not exists discord_text text not null default '';
+  add column if not exists discord_text text not null default '',
+  add column if not exists contact_avatar_url text not null default '',
+  add column if not exists contact_avatar_label text not null default 'baekhawhom',
+  add column if not exists contact_box_title text not null default 'Contact khawhom',
+  add column if not exists contact_box_text text not null default '';
 
 -- Allow admins to replace an image at the same object path if ever needed.
 drop policy if exists "Admins update account images" on storage.objects;

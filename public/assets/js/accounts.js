@@ -19,9 +19,21 @@
   let rows = [];
   let category = "all";
   let status = "available";
+  let currentPage = 1;
+  const MOBILE_CHICKEN_SKIN_PER_PAGE = 4;
+  const mobileGridMedia = window.matchMedia
+    ? window.matchMedia("(max-width: 680px)")
+    : null;
   const catName = { chicken_skin: "ไอดีไก่สกิน", normal: "ไอดีปกติ" };
   const statusLabel = { available: "พร้อมขาย", installment: "ติดผ่อน", sold: "ขายแล้ว" };
   const INSTALLMENT_TAG_RE = /\s*\[status:installment\]\s*$/;
+
+  function isMobileChickenSkinMode() {
+    return (
+      category === "chicken_skin" &&
+      Boolean(mobileGridMedia && mobileGridMedia.matches)
+    );
+  }
 
   function normalizeAccountRow(row) {
     if (!row || typeof row !== "object") return row;
@@ -104,6 +116,49 @@
     observeRevealElements(targets);
   }
 
+  function renderPagination(totalItems) {
+    const pagerEl = $("accountPagination");
+    if (!pagerEl) return;
+
+    if (!isMobileChickenSkinMode() || totalItems <= MOBILE_CHICKEN_SKIN_PER_PAGE) {
+      pagerEl.innerHTML = "";
+      pagerEl.hidden = true;
+      return;
+    }
+
+    const totalPages = Math.max(1, Math.ceil(totalItems / MOBILE_CHICKEN_SKIN_PER_PAGE));
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    let html =
+      '<button type="button" class="account-page-btn" data-page-target="' +
+      (currentPage - 1) +
+      '"' +
+      (currentPage <= 1 ? " disabled" : "") +
+      ">‹ ก่อนหน้า</button>";
+
+    for (let p = 1; p <= totalPages; p++) {
+      html +=
+        '<button type="button" class="account-page-btn' +
+        (p === currentPage ? " is-active" : "") +
+        '" data-page-target="' +
+        p +
+        '">' +
+        p +
+        "</button>";
+    }
+
+    html +=
+      '<button type="button" class="account-page-btn" data-page-target="' +
+      (currentPage + 1) +
+      '"' +
+      (currentPage >= totalPages ? " disabled" : "") +
+      ">ถัดไป ›</button>";
+
+    pagerEl.innerHTML = html;
+    pagerEl.hidden = false;
+  }
+
   function render() {
     const matches = rows.filter(
       (x) =>
@@ -121,17 +176,43 @@
     $("soldCount").textContent = rows.filter(
       (x) => (category === "all" || x.category === category) && x.status === "sold"
     ).length;
+
+    const useMobile2x2Page = isMobileChickenSkinMode();
+    const totalPages = useMobile2x2Page
+      ? Math.max(1, Math.ceil(matches.length / MOBILE_CHICKEN_SKIN_PER_PAGE))
+      : 1;
+    if (currentPage > totalPages) currentPage = totalPages;
+    if (currentPage < 1) currentPage = 1;
+
+    const visibleItems = useMobile2x2Page
+      ? matches.slice(
+          (currentPage - 1) * MOBILE_CHICKEN_SKIN_PER_PAGE,
+          currentPage * MOBILE_CHICKEN_SKIN_PER_PAGE
+        )
+      : matches;
+
     $("resultCount").textContent =
       "แสดง " +
-      matches.length +
+      visibleItems.length +
+      (useMobile2x2Page && matches.length > MOBILE_CHICKEN_SKIN_PER_PAGE
+        ? " จาก " + matches.length
+        : "") +
       " รายการ · " +
-      (statusLabel[status] || "พร้อมขาย");
+      (statusLabel[status] || "พร้อมขาย") +
+      (useMobile2x2Page && totalPages > 1
+        ? " (หน้า " + currentPage + "/" + totalPages + ")"
+        : "");
 
     const gridEl = $("accountGrid");
-    gridEl.innerHTML = matches.length
-      ? matches
+    gridEl.setAttribute("data-grid-category", category);
+
+    gridEl.innerHTML = visibleItems.length
+      ? visibleItems
           .map((x, idx) => {
-            const fallbackImg = FALLBACK_IMAGES[idx % FALLBACK_IMAGES.length];
+            const globalIdx = useMobile2x2Page
+              ? (currentPage - 1) * MOBILE_CHICKEN_SKIN_PER_PAGE + idx
+              : idx;
+            const fallbackImg = FALLBACK_IMAGES[globalIdx % FALLBACK_IMAGES.length];
             const imgSrc = x.image_url ? esc(x.image_url) : fallbackImg;
             const stateClass =
               x.status === "installment"
@@ -146,7 +227,7 @@
               x.description || "ไอดีคัดพิเศษ ตรวจสอบความปลอดภัยเรียบร้อย";
             const previewAttrs =
               ' data-preview-idx="' +
-              idx +
+              globalIdx +
               '" data-preview-title="' +
               esc(x.title) +
               '" data-preview-meta="' +
@@ -158,9 +239,10 @@
               '" data-preview-desc="' +
               esc(descText) +
               '"';
+            const delayMod = useMobile2x2Page ? 2 : 3;
             return (
               '<article class="card reveal-on-scroll" style="--reveal-delay: ' +
-              (idx % 3) * 85 +
+              (idx % delayMod) * 70 +
               'ms">' +
               '<div class="card-media"' +
               previewAttrs +
@@ -210,28 +292,61 @@
           .join("")
       : '<p class="empty reveal-on-scroll">ยังไม่มีรายการในหมวดนี้ค่ะ ♡</p>';
 
+    renderPagination(matches.length);
     observeRevealElements(Array.from(gridEl.querySelectorAll(".card, .empty")));
   }
 
-  document.querySelectorAll("[data-category]").forEach((b) =>
+  document.querySelectorAll(".category-tabs [data-category]").forEach((b) =>
     b.addEventListener("click", () => {
       category = b.dataset.category;
+      currentPage = 1;
       document
-        .querySelectorAll("[data-category]")
+        .querySelectorAll(".category-tabs [data-category]")
         .forEach((x) => x.classList.toggle("active", x === b));
       render();
     })
   );
 
-  document.querySelectorAll("[data-status]").forEach((b) =>
+  document.querySelectorAll(".status-tabs [data-status]").forEach((b) =>
     b.addEventListener("click", () => {
       status = b.dataset.status;
+      currentPage = 1;
       document
-        .querySelectorAll("[data-status]")
+        .querySelectorAll(".status-tabs [data-status]")
         .forEach((x) => x.classList.toggle("active", x === b));
       render();
     })
   );
+
+  const paginationNav = $("accountPagination");
+  if (paginationNav) {
+    paginationNav.addEventListener("click", (event) => {
+      const btn = event.target.closest("[data-page-target]");
+      if (!btn || btn.disabled) return;
+      const targetPage = Number(btn.getAttribute("data-page-target"));
+      if (!Number.isFinite(targetPage) || targetPage === currentPage) return;
+      currentPage = targetPage;
+      render();
+      const catalogEl = document.querySelector(".catalog");
+      if (catalogEl) {
+        catalogEl.scrollIntoView({ behavior: "smooth", block: "start" });
+      }
+    });
+  }
+
+  if (mobileGridMedia) {
+    if (typeof mobileGridMedia.addEventListener === "function") {
+      mobileGridMedia.addEventListener("change", () => {
+        currentPage = 1;
+        render();
+      });
+    } else if (typeof mobileGridMedia.addListener === "function") {
+      mobileGridMedia.addListener(() => {
+        currentPage = 1;
+        render();
+      });
+    }
+  }
 
   function initBackToTopButton() {
     const btn = document.getElementById("backToTopBtn");
