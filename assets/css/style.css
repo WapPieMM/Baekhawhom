@@ -1150,6 +1150,13 @@ div:nth-of-type(2) > main:nth-of-type(1) > section#home:nth-of-type(1),
   border-bottom: 1px solid var(--line);
 }
 
+.modal-media[hidden],
+.modal-media img[hidden],
+.portrait-frame[hidden],
+.portrait-frame img[hidden] {
+  display: none !important;
+}
+
 .modal-media img {
   width: 100%;
   height: auto;

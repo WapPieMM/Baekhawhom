@@ -1,5 +1,21 @@
 (() => {
-  const FALLBACK_THUMB = "/assets/images/theme/card_portrait_1.jpg";
+  const LEGACY_PLACEHOLDER_IMAGES = new Set([
+    "/assets/images/theme/card_portrait_1.jpg",
+    "/assets/images/theme/card_portrait_2.jpg",
+    "/assets/images/theme/card_portrait_3.jpg",
+    "/src/assets/images/account_card_valkyrie_1794387727810.jpg",
+    "/src/assets/images/account_card_nocturne_1794387729965.jpg",
+    "/src/assets/images/account_card_celestial_1794387730417.jpg"
+  ]);
+
+  function cleanAccountImageUrl(url) {
+    const trimmed = String(url || "").trim();
+    if (!trimmed || LEGACY_PLACEHOLDER_IMAGES.has(trimmed)) {
+      return "";
+    }
+    return trimmed;
+  }
+
   const cfg = window.SHOP_CONFIG || {};
   const $ = (id) => document.getElementById(id);
   const form = $("accountForm");
@@ -29,6 +45,7 @@
     const hasTag = INSTALLMENT_TAG_RE.test(rawDesc);
     return {
       ...row,
+      image_url: cleanAccountImageUrl(row.image_url),
       status: hasTag ? "installment" : row.status,
       description: rawDesc.replace(INSTALLMENT_TAG_RE, "")
     };
@@ -584,7 +601,10 @@
     form.elements.id.value = "";
     form.elements.price.value = "299";
     form.elements.image_url.value = "";
-    if (accountFormPreview) accountFormPreview.src = FALLBACK_THUMB;
+    if (accountFormPreview) {
+      accountFormPreview.removeAttribute("src");
+      accountFormPreview.hidden = true;
+    }
     $("formTitle").textContent = "เพิ่ม / แก้ไขไอดีและรูปการ์ด";
     message("formMessage", "");
   }
@@ -596,7 +616,7 @@
     e.preventDefault();
     const fd = new FormData(form);
     const id = fd.get("id");
-    let imageUrl = String(fd.get("image_url") || "").trim();
+    let imageUrl = cleanAccountImageUrl(fd.get("image_url"));
 
     const file = fd.get("image_file");
     if (file && file.size && !imageUrl.startsWith("/uploads/")) {
@@ -613,7 +633,7 @@
       status: fd.get("status"),
       price: Number(fd.get("price")),
       description: String(fd.get("description") || "").trim(),
-      image_url: imageUrl || FALLBACK_THUMB
+      image_url: imageUrl
     };
 
     if (!payload.title || !Number.isFinite(payload.price) || payload.price < 0) {
@@ -670,6 +690,16 @@
         rows = [];
       } else {
         rows = Array.isArray(data) ? data : [];
+        const hasLegacyPlaceholders = rows.some((r) =>
+          LEGACY_PLACEHOLDER_IMAGES.has(String(r?.image_url || "").trim())
+        );
+        if (hasLegacyPlaceholders) {
+          db.from("accounts")
+            .update({ image_url: "" })
+            .in("image_url", Array.from(LEGACY_PLACEHOLDER_IMAGES))
+            .then(() => {})
+            .catch(() => {});
+        }
       }
     }
 
@@ -691,17 +721,19 @@
     $("accountList").innerHTML = list.length
       ? list
           .map((x) => {
-            const imgSrc = x.image_url ? esc(x.image_url) : FALLBACK_THUMB;
+            const cleanUrl = cleanAccountImageUrl(x.image_url);
+            const imgSrc = cleanUrl ? esc(cleanUrl) : "";
             const isConfirming = pendingDeleteId === String(x.id);
+            const thumbHtml = imgSrc
+              ? '<div><img src="' +
+                imgSrc +
+                '" alt="' +
+                esc(x.title) +
+                '" referrerpolicy="no-referrer" onerror="this.onerror=null;this.hidden=true;"></div>'
+              : '<div class="account-row-no-img">ไม่มีรูปภาพ</div>';
             return (
               '<article class="account-row">' +
-              '<div><img src="' +
-              imgSrc +
-              '" alt="' +
-              esc(x.title) +
-              '" referrerpolicy="no-referrer" onerror="this.onerror=null;this.src=\'' +
-              FALLBACK_THUMB +
-              '\';"></div>' +
+              thumbHtml +
               "<div><h3>" +
               esc(x.title) +
               "</h3><p>" +
@@ -738,7 +770,14 @@
         if (form.elements[k] && k !== "image_file") form.elements[k].value = v ?? "";
       });
       if (accountFormPreview) {
-        accountFormPreview.src = x.image_url || FALLBACK_THUMB;
+        const cleanUrl = cleanAccountImageUrl(x.image_url);
+        if (cleanUrl) {
+          accountFormPreview.src = cleanUrl;
+          accountFormPreview.hidden = false;
+        } else {
+          accountFormPreview.removeAttribute("src");
+          accountFormPreview.hidden = true;
+        }
       }
       $("formTitle").textContent = "แก้ไขไอดี #" + x.id;
       form.scrollIntoView({ behavior: "smooth", block: "center" });

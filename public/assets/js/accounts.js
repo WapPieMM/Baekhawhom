@@ -1,9 +1,20 @@
 (() => {
-  const FALLBACK_IMAGES = [
+  const LEGACY_PLACEHOLDER_IMAGES = new Set([
     "/assets/images/theme/card_portrait_1.jpg",
     "/assets/images/theme/card_portrait_2.jpg",
-    "/assets/images/theme/card_portrait_3.jpg"
-  ];
+    "/assets/images/theme/card_portrait_3.jpg",
+    "/src/assets/images/account_card_valkyrie_1794387727810.jpg",
+    "/src/assets/images/account_card_nocturne_1794387729965.jpg",
+    "/src/assets/images/account_card_celestial_1794387730417.jpg"
+  ]);
+
+  function cleanAccountImageUrl(url) {
+    const trimmed = String(url || "").trim();
+    if (!trimmed || LEGACY_PLACEHOLDER_IMAGES.has(trimmed)) {
+      return "";
+    }
+    return trimmed;
+  }
 
   const cfg = window.SHOP_CONFIG || {};
   const $ = (id) => document.getElementById(id);
@@ -41,6 +52,7 @@
     const hasTag = INSTALLMENT_TAG_RE.test(rawDesc);
     return {
       ...row,
+      image_url: cleanAccountImageUrl(row.image_url),
       status: hasTag ? "installment" : row.status,
       description: rawDesc.replace(INSTALLMENT_TAG_RE, "")
     };
@@ -212,8 +224,8 @@
             const globalIdx = useMobile2x2Page
               ? (currentPage - 1) * MOBILE_CHICKEN_SKIN_PER_PAGE + idx
               : idx;
-            const fallbackImg = FALLBACK_IMAGES[globalIdx % FALLBACK_IMAGES.length];
-            const imgSrc = x.image_url ? esc(x.image_url) : fallbackImg;
+            const cleanImgUrl = cleanAccountImageUrl(x.image_url);
+            const imgSrc = cleanImgUrl ? esc(cleanImgUrl) : "";
             const stateClass =
               x.status === "installment"
                 ? "installment"
@@ -241,20 +253,22 @@
               '"';
             const delayMod = useMobile2x2Page ? 2 : 3;
             return (
-              '<article class="card reveal-on-scroll" style="--reveal-delay: ' +
+              '<article class="card reveal-on-scroll' +
+              (imgSrc ? "" : " card-no-image") +
+              '" style="--reveal-delay: ' +
               (idx % delayMod) * 70 +
               'ms">' +
-              '<div class="card-media"' +
-              previewAttrs +
-              ">" +
-              '<img src="' +
-              imgSrc +
-              '" alt="' +
-              esc(x.title) +
-              '" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;this.src=\'' +
-              fallbackImg +
-              '\';">' +
-              "</div>" +
+              (imgSrc
+                ? '<div class="card-media"' +
+                  previewAttrs +
+                  ">" +
+                  '<img src="' +
+                  imgSrc +
+                  '" alt="' +
+                  esc(x.title) +
+                  '" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;var m=this.closest(\'.card-media\');if(m)m.hidden=true;">' +
+                  "</div>"
+                : "") +
               '<div class="body">' +
               '<div class="card-meta">' +
               '<span class="state-label ' +
@@ -847,9 +861,18 @@
         modalMeta.textContent = previewTrigger.getAttribute("data-preview-meta") || "";
         modalPrice.textContent = previewTrigger.getAttribute("data-preview-price") || "";
         modalDesc.textContent = previewTrigger.getAttribute("data-preview-desc") || "";
-        const imgUrl = previewTrigger.getAttribute("data-preview-img") || FALLBACK_IMAGES[0];
-        modalImage.src = imgUrl;
-        modalImage.alt = modalTitle.textContent;
+        const imgUrl = cleanAccountImageUrl(previewTrigger.getAttribute("data-preview-img") || "");
+        const modalMedia = modalImage ? modalImage.closest(".modal-media") : null;
+        if (imgUrl && modalImage) {
+          modalImage.src = imgUrl;
+          modalImage.alt = modalTitle.textContent;
+          modalImage.hidden = false;
+          if (modalMedia) modalMedia.hidden = false;
+        } else if (modalImage) {
+          modalImage.removeAttribute("src");
+          modalImage.hidden = true;
+          if (modalMedia) modalMedia.hidden = true;
+        }
         modal.hidden = false;
         return;
       }

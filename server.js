@@ -164,7 +164,7 @@ app.post('/api/accounts', (req, res) => {
       status: validStatus(body.status),
       price: Number(body.price || 0),
       description: String(body.description || '').trim(),
-      image_url: imageUrl || settings.card_1_url,
+      image_url: imageUrl || '',
       created_at: new Date().toISOString()
     };
     list.unshift(newItem);
@@ -192,7 +192,7 @@ app.put('/api/accounts/:id', (req, res) => {
         status: validStatus(body.status),
         price: Number(body.price || 0),
         description: String(body.description || '').trim(),
-        image_url: imageUrl || settings.card_1_url,
+        image_url: imageUrl || '',
         created_at: new Date().toISOString()
       };
       list.unshift(created);
@@ -206,7 +206,7 @@ app.put('/api/accounts/:id', (req, res) => {
       status: body.status ? validStatus(body.status) : list[idx].status,
       price: body.price !== undefined ? Number(body.price) : list[idx].price,
       description: body.description !== undefined ? String(body.description).trim() : list[idx].description,
-      image_url: imageUrl || list[idx].image_url,
+      image_url: body.image_url !== undefined ? imageUrl : list[idx].image_url,
       updated_at: new Date().toISOString()
     };
     saveSettings({ featured_accounts: list });

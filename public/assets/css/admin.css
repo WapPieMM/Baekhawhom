@@ -481,6 +481,21 @@ textarea {
   display: block;
 }
 
+.account-row-no-img {
+  width: 118px;
+  min-height: 54px;
+  border-radius: 8px;
+  background: var(--beige);
+  border: 1px dashed var(--line);
+  color: var(--muted);
+  font-size: 11px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 6px;
+}
+
 .account-row h3 {
   font-size: 13px;
   font-weight: 500;

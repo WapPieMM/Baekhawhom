@@ -554,6 +554,13 @@ main {
   border: 1px solid rgba(196, 196, 208, 0.6);
 }
 
+.card-media[hidden],
+.modal-media[hidden],
+.card-media img[hidden],
+.modal-media img[hidden] {
+  display: none !important;
+}
+
 .card-media img {
   width: 100%;
   height: auto;
@@ -567,6 +574,11 @@ main {
   display: flex;
   flex-direction: column;
   flex: 1;
+}
+
+.card-no-image .body,
+.card > .body:first-child {
+  padding-top: 6px;
 }
 
 .card-meta {

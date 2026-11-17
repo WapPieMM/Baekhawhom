@@ -1,9 +1,20 @@
 (() => {
-  const DEFAULT_CARDS = [
+  const LEGACY_PLACEHOLDER_IMAGES = new Set([
     "/assets/images/theme/card_portrait_1.jpg",
     "/assets/images/theme/card_portrait_2.jpg",
-    "/assets/images/theme/card_portrait_3.jpg"
-  ];
+    "/assets/images/theme/card_portrait_3.jpg",
+    "/src/assets/images/account_card_valkyrie_1794387727810.jpg",
+    "/src/assets/images/account_card_nocturne_1794387729965.jpg",
+    "/src/assets/images/account_card_celestial_1794387730417.jpg"
+  ]);
+
+  function cleanAccountImageUrl(url) {
+    const trimmed = String(url || "").trim();
+    if (!trimmed || LEGACY_PLACEHOLDER_IMAGES.has(trimmed)) {
+      return "";
+    }
+    return trimmed;
+  }
 
   const catLabel = {
     chicken_skin: "ไอดีไก่สกิน",
@@ -733,9 +744,18 @@
       modalMeta.textContent = previewBtn.getAttribute("data-preview-meta") || "";
       modalPrice.textContent = previewBtn.getAttribute("data-preview-price") || "";
       modalDesc.textContent = previewBtn.getAttribute("data-preview-desc") || "";
-      const imgUrl = previewBtn.getAttribute("data-preview-img") || DEFAULT_CARDS[0];
-      modalImage.src = imgUrl;
-      modalImage.alt = modalTitle.textContent;
+      const imgUrl = cleanAccountImageUrl(previewBtn.getAttribute("data-preview-img") || "");
+      const modalMedia = modalImage ? modalImage.closest(".modal-media") : null;
+      if (imgUrl && modalImage) {
+        modalImage.src = imgUrl;
+        modalImage.alt = modalTitle.textContent;
+        modalImage.hidden = false;
+        if (modalMedia) modalMedia.hidden = false;
+      } else if (modalImage) {
+        modalImage.removeAttribute("src");
+        modalImage.hidden = true;
+        if (modalMedia) modalMedia.hidden = true;
+      }
       modal.hidden = false;
       return;
     }
@@ -771,7 +791,6 @@
   // Carousel state
   let allAccounts = [];
   let startIndex = 0;
-  let cardFallbacks = [...DEFAULT_CARDS];
   const mobileCarouselMedia = window.matchMedia
     ? window.matchMedia("(max-width: 680px)")
     : null;
@@ -802,8 +821,8 @@
 
     grid.innerHTML = visible
       .map(({ item, idx }, cardPos) => {
-        const fallbackImg = cardFallbacks[idx % cardFallbacks.length] || DEFAULT_CARDS[0];
-        const imgSrc = item.image_url ? esc(item.image_url) : fallbackImg;
+        const cleanUrl = cleanAccountImageUrl(item.image_url);
+        const imgSrc = cleanUrl ? esc(cleanUrl) : "";
         const catText = catLabel[item.category] || "ไอดีปกติ";
         const priceFormatted = "฿ " + Number(item.price || 0).toLocaleString("th-TH") + ".-";
         const codeText = "รหัส BKH-" + String(item.id || idx + 1).padStart(2, "0");
@@ -816,15 +835,15 @@
           cardPos * 85 +
           'ms">' +
           '<span class="card-crown-badge" aria-hidden="true">♛</span>' +
-          '<div class="portrait-frame">' +
-          '<img src="' +
-          imgSrc +
-          '" alt="' +
-          esc(item.title) +
-          '" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;this.src=\'' +
-          fallbackImg +
-          '\';">' +
-          "</div>" +
+          (imgSrc
+            ? '<div class="portrait-frame">' +
+              '<img src="' +
+              imgSrc +
+              '" alt="' +
+              esc(item.title) +
+              '" referrerpolicy="no-referrer" loading="lazy" onerror="this.onerror=null;var f=this.closest(\'.portrait-frame\');if(f)f.hidden=true;">' +
+              "</div>"
+            : "") +
           '<div class="portrait-card-info">' +
           "<h3>" +
           esc(item.title) +
@@ -932,12 +951,6 @@
         dot.style.boxShadow = "0 0 6px " + statusDotColor + "66";
       });
     }
-
-    cardFallbacks = [
-      settings.card_1_url || DEFAULT_CARDS[0],
-      settings.card_2_url || DEFAULT_CARDS[1],
-      settings.card_3_url || DEFAULT_CARDS[2]
-    ];
 
     // Contact Channels
     const contactList = document.getElementById("contactList");
